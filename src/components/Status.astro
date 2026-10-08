@@ -1,0 +1,71 @@
+---
+/**
+ * Status stamp. Every piece is always in one of three states.
+ * AVAILABLE is the only one that carries Return Tan (Black Thread on tan).
+ * IN WORK carries a live dot; RETURNED is an outline.
+ */
+import type { Status } from '../data/pieces';
+import { statusLabel } from '../data/pieces';
+
+interface Props {
+  status: Status;
+  size?: 's' | 'm';
+  class?: string;
+}
+const { status, size = 'm', class: cls } = Astro.props;
+---
+
+<span class:list={['status', `status--${status}`, `status--${size}`, 'mono', 'mono--m', cls]}>
+  {status === 'in-work' && <span class="dot" aria-hidden="true" />}
+  {statusLabel[status]}
+</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.38em 0.7em 0.34em;
+    border: 1px solid currentColor;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .status--s {
+    font-size: var(--t-mono-s);
+    padding: 0.32em 0.55em 0.28em;
+  }
+  .status--available {
+    background: var(--return-tan);
+    border-color: var(--return-tan);
+    color: var(--black-thread);
+  }
+  .status--in-work {
+    color: var(--ink);
+  }
+  .status--returned {
+    color: var(--ink-soft);
+    border-style: dashed;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: rr-pulse 2.4s var(--ease-in-out) infinite;
+  }
+  @keyframes rr-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
+  }
+</style>

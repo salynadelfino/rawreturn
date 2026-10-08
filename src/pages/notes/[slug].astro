@@ -1,0 +1,130 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Img from '../../components/Img.astro';
+import Button from '../../components/Button.astro';
+import notes, { series } from '../../data/notes';
+import type { Note } from '../../data/notes';
+import pieces from '../../data/pieces';
+
+export const getStaticPaths = (() =>
+  notes.map((n, i) => ({ params: { slug: n.slug }, props: { note: n, next: notes[(i + 1) % notes.length] } }))) satisfies GetStaticPaths;
+
+interface Props {
+  note: Note;
+  next: Note;
+}
+const { note: n, next } = Astro.props;
+const piece = n.piece ? pieces.find((p) => p.no === n.piece) : undefined;
+---
+
+<Base title={n.title} description={n.dek} image={n.image}>
+  <article class="note">
+    <header class="wrap n-head">
+      <p class="record n-meta">
+        <a href={`/notes?series=${encodeURIComponent(n.series)}`}>{n.series}</a>
+        <span>{n.date}</span>
+      </p>
+      <h1 class="stamp display">{n.title}</h1>
+      <p class="voice n-dek">{n.dek}</p>
+    </header>
+    <figure class="n-fig wrap">
+      <div class="frame" style="aspect-ratio:16/9" data-reveal="mask">
+        <Img src={n.image} alt={n.alt} sizes="100vw" loading="eager" />
+      </div>
+      <figcaption class="caption mono mono--s"><span>{n.series}{n.piece ? ` · ${n.piece}` : ''}</span><span>{n.date}</span></figcaption>
+    </figure>
+    <div class="wrap grid n-body">
+      <div class="n-aside record">
+        <p class="mono--m">{n.series}</p>
+        <p class="meta mono--sentence">{series[n.series]}</p>
+        {
+          piece && (
+            <a href={`/archive/${piece.slug}`} class="n-piece">
+              {piece.no} {piece.name} →
+            </a>
+          )
+        }
+      </div>
+      <div class="n-text">
+        {n.body.map((para) => <p data-reveal>{para}</p>)}
+        <p class="sign mono mono--s meta">— From the bench</p>
+      </div>
+    </div>
+    <nav class="wrap n-next" aria-label="Next note">
+      <span class="mono meta">Next</span>
+      <a href={`/notes/${next.slug}`} class="stamp h2">{next.title} →</a>
+      <Button href="/notes" variant="link">All notes</Button>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .n-head {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(32px, 4vw, 56px);
+    display: grid;
+    gap: 24px;
+  }
+  .n-meta {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .n-meta a {
+    text-decoration: none;
+  }
+  .n-head h1 {
+    max-width: 16ch;
+  }
+  .n-dek {
+    max-width: 30ch;
+  }
+  .n-fig .frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .n-body {
+    padding-block: clamp(48px, 7vw, 100px);
+    row-gap: 32px;
+  }
+  .n-aside {
+    grid-column: 1 / span 3;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .n-piece {
+    margin-top: 12px;
+  }
+  .n-text {
+    grid-column: 5 / span 6;
+    font-family: var(--font-voice);
+    font-size: clamp(1.15rem, 1.4vw, 1.3rem);
+    line-height: 1.6;
+    display: grid;
+    gap: 1.1em;
+    max-width: 62ch;
+  }
+  .n-text p:not(.sign) {
+    font-style: normal;
+  }
+  .n-next {
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+    padding-block: clamp(48px, 6vw, 80px);
+    border-top: 1px solid var(--rule-strong);
+  }
+  .n-next a.stamp {
+    text-decoration: none;
+  }
+  @media (max-width: 899px) {
+    .n-aside,
+    .n-text {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

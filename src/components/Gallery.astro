@@ -1,0 +1,116 @@
+---
+/**
+ * Product gallery. Desktop: an editorial vertical sequence (the purchase
+ * module stays sticky beside it). Mobile: a swipe strip with a frame counter.
+ */
+import Img from './Img.astro';
+
+interface Shot {
+  src: string;
+  alt: string;
+  label: string;
+  wide?: boolean;
+}
+interface Props {
+  shots: Shot[];
+  slug: string;
+}
+const { shots, slug } = Astro.props;
+---
+
+<div class="gal" data-gallery>
+  <ol role="list" class="gal-track" data-gallery-track aria-label="Photographs">
+    {
+      shots.map((s, i) => (
+        <li class:list={['gal-item', s.wide && 'gal-item--wide']}>
+          <figure>
+            <div
+              class="frame gal-frame"
+              data-reveal={i === 0 ? undefined : 'mask'}
+              transition:name={i === 0 ? `img-${slug}` : undefined}
+            >
+              <Img
+                src={s.src}
+                alt={s.alt}
+                sizes="(min-width: 900px) 58vw, 100vw"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
+              />
+            </div>
+            <figcaption class="caption mono mono--s">
+              <span>{String(i + 1).padStart(2, '0')} — {s.label}</span>
+            </figcaption>
+          </figure>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="gal-count mono mono--m" aria-hidden="true">
+    <span data-gallery-count>01</span> / {String(shots.length).padStart(2, '0')}
+  </p>
+</div>
+
+<style>
+  .gal-track {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+  }
+  .gal-item {
+    grid-column: span 1;
+  }
+  .gal-item:first-child,
+  .gal-item--wide {
+    grid-column: 1 / -1;
+  }
+  .gal-frame {
+    aspect-ratio: 4/5;
+  }
+  .gal-item--wide .gal-frame {
+    aspect-ratio: 3/2;
+  }
+  .gal-frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gal-count {
+    display: none;
+  }
+  @media (max-width: 899px) {
+    .gal {
+      position: relative;
+      margin-inline: calc(var(--pad) * -1);
+    }
+    .gal-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      gap: 0;
+    }
+    .gal-track::-webkit-scrollbar {
+      display: none;
+    }
+    .gal-item {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+    }
+    .gal-frame,
+    .gal-item--wide .gal-frame {
+      aspect-ratio: 4/5;
+    }
+    .caption {
+      padding-inline: var(--pad);
+    }
+    .gal-count {
+      display: block;
+      position: absolute;
+      right: calc(var(--pad));
+      top: 12px;
+      padding: 4px 6px 3px;
+      background: var(--ecru);
+      letter-spacing: 0.1em;
+    }
+  }
+</style>

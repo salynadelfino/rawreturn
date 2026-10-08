@@ -1,0 +1,220 @@
+---
+/**
+ * The archive — a numbered list of every piece ever made: available, in work
+ * and returned. Two views: the ledger (default) and the records.
+ */
+import Base from '../../layouts/Base.astro';
+import ArchiveTable from '../../components/ArchiveTable.astro';
+import ArchiveRecord from '../../components/ArchiveRecord.astro';
+import Img from '../../components/Img.astro';
+import Lines from '../../components/Lines.astro';
+import { archiveOrder, totals } from '../../data/pieces';
+
+const all = archiveOrder();
+const t = totals();
+const counts = {
+  available: all.filter((p) => p.status === 'available').length,
+  'in-work': all.filter((p) => p.status === 'in-work').length,
+  returned: all.filter((p) => p.status === 'returned').length,
+};
+---
+
+<Base title="Archive" description="Every piece Raw Return has made, numbered from RR-001. Available, in work and returned — with a record of exactly how each was made.">
+  <section class="head wrap">
+    <div class="head-row mono mono--m meta">
+      <span>Archive</span>
+      <span>RR-001 → {all[0].no}</span>
+    </div>
+    <Lines as="h1" class="stamp mega" lines={['The', 'archive']} />
+    <div class="grid head-grid">
+      <p class="lede" data-reveal>
+        Every piece, in order. Numbers never reset and sold pieces never come down. This is the record of the house.
+      </p>
+      <dl class="stats record" data-reveal style="--i:1">
+        <div><dt>Pieces</dt><dd>{t.pieces}</dd></div>
+        <div><dt>Available</dt><dd>{counts.available}</dd></div>
+        <div><dt>In work</dt><dd>{counts['in-work']}</dd></div>
+        <div><dt>Returned</dt><dd>{counts.returned}</dd></div>
+        <div><dt>Hours</dt><dd>{t.hours}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="wrap ledger body" aria-label="Archive">
+    <div class="view-bar" role="group" aria-label="View">
+      <div class="filters mono mono--m" role="group" aria-label="Filter by status">
+        <button type="button" aria-pressed="true" data-filter="all">All ({t.pieces})</button>
+        <button type="button" aria-pressed="false" data-filter="available">Available ({counts.available})</button>
+        <button type="button" aria-pressed="false" data-filter="in-work">In work ({counts['in-work']})</button>
+        <button type="button" aria-pressed="false" data-filter="returned">Returned ({counts.returned})</button>
+      </div>
+      <div class="views mono mono--m" role="group" aria-label="Layout">
+        <button type="button" aria-pressed="true" data-view="ledger">Ledger</button>
+        <button type="button" aria-pressed="false" data-view="records">Records</button>
+      </div>
+    </div>
+
+    <div data-archive-view="ledger">
+      <ArchiveTable pieces={all} />
+    </div>
+
+    <ol role="list" class="records" data-archive-view="records" hidden>
+      {
+        all.map((p) => (
+          <li data-status={p.status}>
+            <a href={`/archive/${p.slug}`} class="rec-link" data-cursor={`${p.no} →`}>
+              <div class="frame rec-img">
+                <Img src={p.images.front} alt={p.alt.front} sizes="(min-width: 900px) 20vw, 45vw" />
+              </div>
+              <ArchiveRecord piece={p} compact />
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Base>
+
+<script>
+  function initArchive() {
+    const root = document.querySelector<HTMLElement>('[data-archive-view="ledger"]')?.parentElement;
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = '1';
+    let filter = 'all';
+    const apply = () => {
+      root.querySelectorAll<HTMLElement>('tbody tr, .records > li').forEach((el) => {
+        el.hidden = filter !== 'all' && el.dataset.status !== filter;
+      });
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) =>
+      b.addEventListener('click', () => {
+        filter = b.dataset.filter!;
+        root.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        apply();
+      }),
+    );
+    root.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const v = b.dataset.view!;
+        root.querySelectorAll('[data-view]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        root.querySelectorAll<HTMLElement>('[data-archive-view]').forEach((el) => {
+          el.hidden = el.dataset.archiveView !== v;
+          el.querySelectorAll('[data-reveal]').forEach((r) => r.classList.add('is-in'));
+        });
+      }),
+    );
+  }
+  document.addEventListener('astro:page-load', initArchive);
+</script>
+
+<style>
+  .head {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(40px, 6vw, 80px);
+    display: grid;
+    gap: clamp(20px, 3vw, 36px);
+  }
+  .head-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .head-grid {
+    row-gap: 32px;
+  }
+  .lede {
+    grid-column: 1 / span 5;
+  }
+  .stats {
+    grid-column: 8 / span 5;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--gutter);
+  }
+  .stats div {
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 8px;
+  }
+  .stats dt {
+    color: var(--ink-soft);
+  }
+  .stats dd {
+    margin: 4px 0 0;
+    font-family: var(--font-stamp);
+    font-stretch: 125%;
+    font-weight: 700;
+    font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  }
+  .body {
+    padding-bottom: clamp(80px, 10vw, 140px);
+  }
+  .view-bar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding: 12px 0;
+    margin-bottom: 28px;
+    border-block: 1px solid var(--rule-strong);
+  }
+  .filters,
+  .views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+  }
+  .view-bar button {
+    background: none;
+    border: 0;
+    padding: 6px 0;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+  }
+  .view-bar button[aria-pressed='true'] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+  .records {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(28px, 4vw, 56px) var(--gutter);
+  }
+  .rec-link {
+    display: grid;
+    grid-template-columns: 0.7fr 1fr;
+    gap: var(--gutter);
+    text-decoration: none;
+    align-items: start;
+  }
+  .rec-img {
+    aspect-ratio: 4/5;
+  }
+  .rec-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .rec-link:hover :global(.rec) {
+    border-color: var(--raw-indigo);
+  }
+  @media (max-width: 899px) {
+    .lede,
+    .stats {
+      grid-column: 1 / -1;
+    }
+    .stats {
+      grid-template-columns: repeat(3, 1fr);
+      row-gap: 16px;
+    }
+    .records {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .rec-link {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

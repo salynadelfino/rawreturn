@@ -1,0 +1,180 @@
+---
+/**
+ * The archive as a ledger: every piece ever made — available, in work and
+ * returned. Rows open the record; on desktop a thumbnail follows the row.
+ */
+import Img from './Img.astro';
+import Status from './Status.astro';
+import type { Piece } from '../data/pieces';
+
+interface Props {
+  pieces: Piece[];
+  class?: string;
+  caption?: string;
+}
+const { pieces, class: cls, caption = 'Every piece made by Raw Return, newest first.' } = Astro.props;
+---
+
+<div class:list={['at', cls]}>
+  <table>
+    <caption class="visually-hidden">{caption}</caption>
+    <thead class="mono mono--m">
+      <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Piece</th>
+        <th scope="col" class="c-first">First life</th>
+        <th scope="col" class="c-num">Hrs</th>
+        <th scope="col" class="c-status">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        pieces.map((p, i) => (
+          <tr data-reveal="fade" data-status={p.status} style={`--i:${Math.min(i, 8)}`}>
+            <td class="record c-no">{p.no}</td>
+            <th scope="row" class="c-name">
+              <a href={`/archive/${p.slug}`} class="stamp" data-cursor={`Open ${p.no}`}>
+                {p.name}
+              </a>
+              <span class="row-thumb" aria-hidden="true">
+                <Img src={p.images.front} alt="" sizes="200px" widths={[240, 400]} />
+              </span>
+            </th>
+            <td class="record c-first">{p.firstLife.join(', ')}</td>
+            <td class="record c-num">{p.hours ?? '—'}</td>
+            <td class="c-status">
+              <Status status={p.status} size="s" />
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .at {
+    width: 100%;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    text-align: left;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  tbody tr {
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  tbody tr:hover {
+    background: rgba(31, 42, 68, 0.05);
+  }
+  td,
+  tbody th {
+    padding: 16px 12px 14px 0;
+    text-align: left;
+    vertical-align: baseline;
+    font-weight: inherit;
+  }
+  .c-no {
+    width: 9ch;
+    color: var(--ink-soft);
+  }
+  .c-name a {
+    font-size: clamp(1rem, 1.6vw, 1.45rem);
+    text-decoration: none;
+  }
+  .c-name a::after {
+    /* whole row is the hit area */
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .c-name a:focus-visible {
+    outline: none;
+  }
+  .c-name a:focus-visible::after {
+    outline: 2px solid var(--raw-indigo);
+    outline-offset: -2px;
+  }
+  .c-num {
+    text-align: right;
+    width: 6ch;
+  }
+  thead .c-num {
+    text-align: right;
+  }
+  .c-status {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+  }
+  thead .c-status {
+    text-align: right;
+  }
+  .row-thumb {
+    position: absolute;
+    right: 18%;
+    top: 50%;
+    width: 120px;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-50%) rotate(-2deg) scale(0.92);
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+    z-index: 2;
+  }
+  .row-thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (hover: hover) and (min-width: 900px) {
+    tbody tr:hover .row-thumb {
+      opacity: 1;
+      transform: translateY(-50%) rotate(-2deg) scale(1);
+    }
+  }
+  @media (max-width: 760px) {
+    .c-first,
+    thead .c-num,
+    .c-num {
+      display: none;
+    }
+    tbody tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas: 'no status' 'name name';
+      padding: 14px 0;
+      row-gap: 6px;
+    }
+    td,
+    tbody th {
+      padding: 0;
+    }
+    .c-no {
+      grid-area: no;
+    }
+    .c-name {
+      grid-area: name;
+    }
+    .c-status {
+      grid-area: status;
+    }
+    thead {
+      display: none;
+    }
+    .row-thumb {
+      display: none;
+    }
+  }
+</style>

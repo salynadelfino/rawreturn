@@ -1,0 +1,181 @@
+---
+/**
+ * Purchase module: number, name, price, availability, add to bag.
+ * Editions get a quantity select (limited to what is left); 1/1s don't.
+ * State (already in bag) is reflected by cart.ts via [data-purchase].
+ */
+import Button from './Button.astro';
+import Status from './Status.astro';
+import type { Piece } from '../data/pieces';
+import { formatPrice, editionLabel } from '../data/pieces';
+
+interface Props {
+  piece: Piece;
+}
+const { piece: p } = Astro.props;
+const forSale = p.status === 'available' && p.edition.remaining > 0;
+---
+
+<div class="pm" data-purchase={p.slug}>
+  <div class="pm-top">
+    <p class="record pm-no">{p.no} · {p.type}</p>
+    <Status status={p.status} />
+  </div>
+  <h1 class="stamp pm-name">{p.name}</h1>
+  <p class="pm-line">
+    {p.firstLife.join(' · ')}{p.hours && <> · {p.hours} hours</>}
+  </p>
+
+  <div class="pm-price-row">
+    <p class="stamp pm-price">{forSale ? formatPrice(p.price) : p.status === 'in-work' ? 'On the bench' : 'Returned'}</p>
+    <p class="record pm-ed">
+      {editionLabel(p)}
+      {p.edition.size > 1 && forSale && <span class="meta"> · {p.edition.remaining} of {p.edition.size} left</span>}
+    </p>
+  </div>
+
+  {
+    forSale ? (
+      <div class="pm-actions">
+        {p.edition.remaining > 1 && (
+          <label class="pm-qty record">
+            <span>Qty</span>
+            <select data-qty>
+              {Array.from({ length: Math.min(p.edition.remaining, 4) }, (_, i) => (
+                <option value={i + 1}>{i + 1}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        <Button data-add class="pm-add" arrow="">
+          Add to bag
+        </Button>
+        <p class="pm-in-bag mono mono--s">
+          In your bag ·{' '}
+          <button type="button" data-bag-open class="linkish">
+            View bag
+          </button>
+        </p>
+      </div>
+    ) : p.status === 'in-work' ? (
+      <div class="pm-actions">
+        <p class="mono pm-wait">
+          Started {p.started} · <span data-day-since={p.started}>In work</span>
+        </p>
+        <Button href="#notify" variant="outline" arrow="↓">
+          Hear when it’s finished
+        </Button>
+      </div>
+    ) : (
+      <div class="pm-actions">
+        <p class="mono pm-wait">
+          Returned {p.returned?.date} — worn by {p.returned?.by}
+        </p>
+        <Button href="/shop" variant="outline">
+          See what’s available
+        </Button>
+      </div>
+    )
+  }
+
+  <dl class="pm-facts record">
+    <div><dt>Fit</dt><dd>{p.fit}</dd></div>
+    <div><dt>Material</dt><dd>{p.material}</dd></div>
+    <div><dt>Shipping</dt><dd>UK 2–3 days, tracked. Worldwide on request.</dd></div>
+  </dl>
+</div>
+
+<style>
+  .pm {
+    display: grid;
+    gap: 18px;
+  }
+  .pm-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .pm-no {
+    color: var(--ink-soft);
+  }
+  .pm-name {
+    font-size: clamp(2.2rem, 4.2vw, 4rem);
+  }
+  .pm-line {
+    color: var(--ink-soft);
+    max-width: 40ch;
+  }
+  .pm-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-block: 14px 4px;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .pm-price {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+  }
+  .pm-actions {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .pm-actions > :global(.btn),
+  .pm-wait {
+    grid-column: 1 / -1;
+  }
+  .pm-qty + :global(.btn) {
+    grid-column: 2;
+  }
+  .pm-qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--rule-strong);
+    padding: 0 12px;
+  }
+  .pm-qty select {
+    border: 0;
+    background: none;
+    min-height: 46px;
+    font-family: var(--font-mono);
+  }
+  .pm-in-bag {
+    grid-column: 1 / -1;
+    display: none;
+    color: var(--ink-soft);
+  }
+  :global([data-purchase][data-in-bag]) .pm-in-bag {
+    display: block;
+  }
+  .linkish {
+    background: none;
+    border: 0;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+  .pm-wait {
+    color: var(--ink-soft);
+  }
+  .pm-facts div {
+    display: grid;
+    grid-template-columns: 10ch 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .pm-facts dt {
+    color: var(--ink-soft);
+  }
+  .pm-facts dd {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+</style>

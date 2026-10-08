@@ -1,0 +1,317 @@
+---
+/**
+ * Checkout. The order summary is read from the bag; delivery details are
+ * validated on the client.
+ *
+ * PLACEHOLDER: no payment provider is connected. Wire the "Continue to
+ * payment" step to Shopify Checkout / Stripe Checkout before launch — the
+ * bag lines (slug + qty) are available as window.rrBag.lines().
+ */
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+---
+
+<Base title="Checkout" description="Raw Return checkout.">
+  <section class="wrap co">
+    <div class="co-row mono mono--m meta">
+      <span>Checkout</span>
+      <span>01 Details → 02 Payment</span>
+    </div>
+    <h1 class="stamp display">Checkout</h1>
+
+    <div class="grid co-grid">
+      <form class="co-form" novalidate data-checkout>
+        <fieldset>
+          <legend class="mono mono--m">01 — Contact</legend>
+          <div class="field">
+            <label for="co-email" class="mono mono--s">Email</label>
+            <input id="co-email" name="email" type="email" autocomplete="email" required aria-describedby="co-email-err" />
+            <p id="co-email-err" class="err mono mono--s" hidden>Enter an email address so we can send the record of making.</p>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="mono mono--m">02 — Delivery</legend>
+          <div class="two">
+            <div class="field">
+              <label for="co-first" class="mono mono--s">First name</label>
+              <input id="co-first" name="given-name" autocomplete="given-name" required aria-describedby="co-first-err" />
+              <p id="co-first-err" class="err mono mono--s" hidden>Required.</p>
+            </div>
+            <div class="field">
+              <label for="co-last" class="mono mono--s">Last name</label>
+              <input id="co-last" name="family-name" autocomplete="family-name" required aria-describedby="co-last-err" />
+              <p id="co-last-err" class="err mono mono--s" hidden>Required.</p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="co-addr" class="mono mono--s">Address</label>
+            <input id="co-addr" name="address-line1" autocomplete="address-line1" required aria-describedby="co-addr-err" />
+            <p id="co-addr-err" class="err mono mono--s" hidden>Required.</p>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="co-city" class="mono mono--s">Town / city</label>
+              <input id="co-city" name="address-level2" autocomplete="address-level2" required aria-describedby="co-city-err" />
+              <p id="co-city-err" class="err mono mono--s" hidden>Required.</p>
+            </div>
+            <div class="field">
+              <label for="co-post" class="mono mono--s">Postcode</label>
+              <input id="co-post" name="postal-code" autocomplete="postal-code" required aria-describedby="co-post-err" />
+              <p id="co-post-err" class="err mono mono--s" hidden>Required.</p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="co-country" class="mono mono--s">Country</label>
+            <select id="co-country" name="country" autocomplete="country">
+              <option>United Kingdom</option>
+              <option>Ireland</option>
+              <option>France</option>
+              <option>Germany</option>
+              <option>Netherlands</option>
+              <option>Japan</option>
+              <option>United States</option>
+              <option>Elsewhere — we’ll confirm shipping by email</option>
+            </select>
+          </div>
+        </fieldset>
+        <Button type="submit" class="co-submit">Continue to payment</Button>
+        <p class="mono mono--s meta co-msg" aria-live="polite" data-checkout-msg></p>
+      </form>
+
+      <aside class="co-summary" aria-labelledby="sum-title">
+        <h2 id="sum-title" class="mono mono--m">Your bag</h2>
+        <ol role="list" class="sum-lines record" data-sum-lines></ol>
+        <p class="sum-empty" data-sum-empty hidden>
+          <span class="voice">Your bag is empty.</span>
+          <a href="/shop" class="mono">The shop →</a>
+        </p>
+        <dl class="sum-totals record">
+          <div><dt>Subtotal</dt><dd data-sum-sub>£0</dd></div>
+          <div><dt>Shipping (UK, tracked)</dt><dd>£12</dd></div>
+          <div class="total"><dt>Total</dt><dd data-sum-total>£0</dd></div>
+        </dl>
+        <hr class="stitch" />
+        <p class="mono mono--s meta in-box">
+          In the box: the piece, its record of making, signed and numbered, and an offcut card — a swatch of the garment it
+          came from.
+        </p>
+      </aside>
+    </div>
+
+    <section class="terms" id="terms" aria-labelledby="terms-title">
+      <h2 id="terms-title" class="mono mono--m">Shipping &amp; terms</h2>
+      <!-- PLACEHOLDER: confirm all terms with the founder. -->
+      <dl class="record terms-list">
+        <div><dt>Dispatch</dt><dd>Within 2 working days, from London.</dd></div>
+        <div><dt>UK</dt><dd>2–3 days, tracked. £12.</dd></div>
+        <div><dt>Worldwide</dt><dd>On request. Duties are the buyer’s.</dd></div>
+        <div><dt>Returns</dt><dd>14 days, unworn, with the record and offcut card.</dd></div>
+        <div><dt>Repairs</dt><dd>Free for the life of the piece.</dd></div>
+      </dl>
+    </section>
+  </section>
+</Base>
+
+<script>
+  const fmt = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+  type Bag = {
+    lines: () => { slug: string; qty: number }[];
+    catalogue: () => Record<string, { no: string; name: string; price: number; edition: string }>;
+    subtotal: () => number;
+  };
+  function renderSummary() {
+    const bag = (window as unknown as { rrBag?: Bag }).rrBag;
+    const list = document.querySelector<HTMLElement>('[data-sum-lines]');
+    if (!bag || !list) return;
+    const cat = bag.catalogue();
+    const lines = bag.lines();
+    list.replaceChildren(
+      ...lines.map((l) => {
+        const li = document.createElement('li');
+        const it = cat[l.slug];
+        li.innerHTML = `<span>${it.no} ${it.name} · ${it.edition}${l.qty > 1 ? ` × ${l.qty}` : ''}</span><span>${fmt.format(it.price * l.qty)}</span>`;
+        return li;
+      }),
+    );
+    const empty = lines.length === 0;
+    document.querySelector<HTMLElement>('[data-sum-empty]')!.hidden = !empty;
+    const sub = bag.subtotal();
+    document.querySelector('[data-sum-sub]')!.textContent = fmt.format(sub);
+    document.querySelector('[data-sum-total]')!.textContent = fmt.format(empty ? 0 : sub + 12);
+    const submit = document.querySelector<HTMLButtonElement>('.co-submit');
+    if (submit) submit.disabled = empty;
+  }
+  function initCheckout() {
+    renderSummary();
+    const form = document.querySelector<HTMLFormElement>('[data-checkout]');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let first: HTMLInputElement | null = null;
+      form.querySelectorAll<HTMLInputElement>('input[required]').forEach((input) => {
+        const ok = input.checkValidity() && input.value.trim() !== '';
+        input.setAttribute('aria-invalid', String(!ok));
+        const err = document.getElementById(input.getAttribute('aria-describedby') || '');
+        if (err) err.hidden = ok;
+        if (!ok && !first) first = input;
+      });
+      const msg = form.querySelector<HTMLElement>('[data-checkout-msg]')!;
+      if (first) {
+        (first as HTMLInputElement).focus();
+        msg.textContent = 'A few details are missing.';
+        return;
+      }
+      msg.textContent = 'Details saved. Payment is not connected in this build — the next step goes to the payment provider.';
+    });
+  }
+  document.addEventListener('astro:page-load', initCheckout);
+  document.addEventListener('rr:bag-ready', renderSummary);
+  window.addEventListener('storage', renderSummary);
+</script>
+
+<style>
+  .co {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(80px, 10vw, 140px);
+    display: grid;
+    gap: clamp(20px, 3vw, 36px);
+  }
+  .co-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .co-grid {
+    row-gap: 48px;
+    align-items: start;
+  }
+  .co-form {
+    grid-column: 1 / span 6;
+    display: grid;
+    gap: 36px;
+  }
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 18px;
+  }
+  legend {
+    padding: 0 0 12px;
+    letter-spacing: 0.1em;
+  }
+  .two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+  }
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+  .field input,
+  .field select {
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1px solid var(--rule-strong);
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 0;
+    font-size: 16px;
+  }
+  .field input:focus,
+  .field select:focus {
+    outline: 2px solid var(--raw-indigo);
+    outline-offset: -1px;
+  }
+  .field input[aria-invalid='true'] {
+    border-color: var(--saddle);
+    border-width: 2px;
+  }
+  .err {
+    color: var(--saddle);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .co-msg {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .co-summary {
+    grid-column: 8 / span 5;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    display: grid;
+    gap: 18px;
+    padding: clamp(18px, 2vw, 28px);
+    border: 1px solid var(--rule-strong);
+  }
+  .sum-lines li,
+  .sum-totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .sum-totals dd {
+    margin: 0;
+  }
+  .sum-totals .total {
+    font-weight: 500;
+    border-top-color: var(--rule-strong);
+  }
+  .sum-empty {
+    display: grid;
+    gap: 8px;
+  }
+  .in-box {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .terms {
+    margin-top: clamp(48px, 6vw, 96px);
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-strong);
+    display: grid;
+    gap: 20px;
+  }
+  .terms-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--gutter);
+  }
+  .terms-list div {
+    display: grid;
+    gap: 6px;
+  }
+  .terms-list dt {
+    color: var(--ink-soft);
+  }
+  .terms-list dd {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  @media (max-width: 899px) {
+    .co-form,
+    .co-summary {
+      grid-column: 1 / -1;
+      position: static;
+    }
+    .co-summary {
+      grid-row: 1;
+    }
+    .terms-list {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 18px;
+    }
+  }
+  @media (max-width: 480px) {
+    .two {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

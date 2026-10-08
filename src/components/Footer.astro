@@ -1,0 +1,156 @@
+---
+import Wordmark from './Wordmark.astro';
+import NewsletterForm from './NewsletterForm.astro';
+import { totals } from '../data/pieces';
+
+const t = totals();
+const year = new Date().getFullYear();
+const loop = 'Reclaimed garments · Returned to the streets · ';
+---
+
+<footer class="site-footer on-indigo" data-tone="dark">
+  <div class="loop mono" aria-hidden="true">
+    <div class="loop-track">
+      {Array.from({ length: 8 }).map(() => <span>{loop}</span>)}
+    </div>
+  </div>
+
+  <div class="wrap grid top">
+    <div class="note">
+      <p class="mono meta">Newsletter</p>
+      <p class="voice">A note from the bench, occasionally.</p>
+      <NewsletterForm />
+    </div>
+
+    <nav class="cols" aria-label="Footer">
+      <ul role="list" class="mono mono--m">
+        <li><a href="/shop">Shop</a></li>
+        <li><a href="/archive">Archive</a></li>
+        <li><a href="/the-house">The House</a></li>
+        <li><a href="/process">Process</a></li>
+        <li><a href="/notes">Notes</a></li>
+      </ul>
+      <ul role="list" class="mono mono--m">
+        <!-- PLACEHOLDER: confirm the Instagram handle and contact address -->
+        <li><a href="https://www.instagram.com/rawreturn/" rel="noopener">Instagram ↗</a></li>
+        <li><a href="mailto:bench@rawreturn.co.uk">Contact</a></li>
+        <li><a href="/the-house#returns">Bring it back</a></li>
+        <li><a href="/checkout#terms">Shipping &amp; terms</a></li>
+      </ul>
+    </nav>
+
+    <dl class="ledger-count record">
+      <div><dt>Pieces made</dt><dd>{String(t.pieces).padStart(3, '0')}</dd></div>
+      <div><dt>Garments taken apart</dt><dd>{String(t.garments).padStart(3, '0')}</dd></div>
+      <div><dt>Hours at the bench</dt><dd>{t.hours}</dd></div>
+      <div><dt>Returned to the street</dt><dd>{String(t.returned).padStart(3, '0')}</dd></div>
+    </dl>
+  </div>
+
+  <div class="wrap mark">
+    <Wordmark as="p" class="footer-wm" />
+  </div>
+
+  <div class="wrap base mono mono--s">
+    <span>London</span>
+    <span>RR-001 → RR-{String(t.pieces).padStart(3, '0')}</span>
+    <span>© {year} Raw Return</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 20px;
+  }
+  .loop {
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    padding: 12px 0;
+    color: var(--hide);
+    letter-spacing: 0.14em;
+  }
+  .loop-track {
+    display: flex;
+    width: max-content;
+    white-space: nowrap;
+    animation: loop 60s linear infinite;
+  }
+  @keyframes loop {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loop-track {
+      animation: none;
+    }
+  }
+  .top {
+    padding-block: clamp(56px, 8vw, 112px) clamp(48px, 6vw, 80px);
+    row-gap: 48px;
+  }
+  .note {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+  .cols {
+    grid-column: 7 / span 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+  }
+  .cols ul {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .cols a {
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+  .cols a:hover {
+    text-decoration: underline;
+  }
+  .ledger-count {
+    grid-column: 10 / span 3;
+    display: grid;
+    gap: 0;
+    align-content: start;
+  }
+  .ledger-count div {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .ledger-count dd {
+    margin: 0;
+  }
+  .mark {
+    padding-block: 8px 20px;
+  }
+  .mark :global(.footer-wm) {
+    font-size: min(9.6vw, 11.6rem);
+    color: var(--ecru);
+    display: flex;
+  }
+  .base {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+  }
+  @media (max-width: 899px) {
+    .note,
+    .cols,
+    .ledger-count {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

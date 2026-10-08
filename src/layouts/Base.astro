@@ -1,0 +1,87 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { getImage as optimise } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+import { getImage } from '../data/images';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string; // registry key for the share image
+  headerTone?: 'light' | 'dark'; // tone of the first screen, so the header starts right
+}
+const {
+  title,
+  description = 'A reconstruction denim house in London. Garments with a past, taken apart and rebuilt into one-of-one pieces — with a record of exactly how.',
+  image = 'hero/hero-bench-night',
+  headerTone = 'light',
+} = Astro.props;
+const fullTitle = title ? `${title} — Raw Return` : 'Raw Return — Reclaimed garments returned to the streets';
+const og = getImage(image);
+const ogImg = og ? await optimise({ src: og, width: 1200, format: 'jpg', quality: 78 }) : null;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en-GB" data-header-tone={headerTone}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#EDE6D8" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Raw Return" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {ogImg && <meta property="og:image" content={new URL(ogImg.src, Astro.site)} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    <ClientRouter fallback="swap" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <CartDrawer />
+    <div class="cursor-label mono mono--m" aria-hidden="true" data-cursor-label transition:persist="cursor"></div>
+    <script>
+      import '../scripts/motion';
+      import '../scripts/cart';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .cursor-label {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 120;
+    padding: 6px 9px 5px;
+    background: var(--raw-indigo);
+    color: var(--ecru);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-100px, -100px, 0);
+    transition: opacity var(--dur-1) linear;
+    white-space: nowrap;
+  }
+  .cursor-label.is-on {
+    opacity: 1;
+  }
+  main {
+    outline: none;
+  }
+</style>

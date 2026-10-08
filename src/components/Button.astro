@@ -1,0 +1,113 @@
+---
+/**
+ * Buttons. Raw Indigo fill for the primary action, outline for secondary,
+ * a mono text link with an arrow for everything else. Square corners only.
+ */
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'outline' | 'link';
+  type?: 'button' | 'submit';
+  class?: string;
+  arrow?: '→' | '↓' | '↗' | '';
+  [key: string]: unknown;
+}
+const { href, variant = 'primary', type = 'button', class: cls, arrow = '→', ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  class:list={['btn', `btn--${variant}`, 'mono', 'mono--m', cls]}
+  {...rest}
+>
+  <span class="btn-label"><slot /></span>
+  {arrow && <span class="btn-arrow" aria-hidden="true">{arrow}</span>}
+</Tag>
+
+<style is:global>
+  .btn {
+    --b-bg: var(--raw-indigo);
+    --b-fg: var(--ecru);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6em;
+    min-height: 48px;
+    padding: 0 1.25em;
+    border: 1px solid var(--b-bg);
+    background: var(--b-bg);
+    color: var(--b-fg);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    overflow: hidden;
+    isolation: isolate;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--black-thread);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: scaleY(1);
+  }
+  .btn-arrow {
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .btn:hover .btn-arrow {
+    transform: translateX(4px);
+  }
+  .btn--outline {
+    --b-bg: transparent;
+    --b-fg: var(--ink);
+    border-color: currentColor;
+    color: var(--ink);
+  }
+  .btn--outline::before {
+    background: var(--ink);
+  }
+  .btn--outline:hover,
+  .btn--outline:focus-visible {
+    color: var(--ground);
+  }
+  .on-indigo .btn--outline:hover,
+  .on-night .btn--outline:hover {
+    color: var(--raw-indigo);
+  }
+  .btn--link {
+    min-height: 0;
+    padding: 0.2em 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    gap: 0.8em;
+    justify-content: flex-start;
+  }
+  .btn--link::before {
+    top: auto;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0.25);
+    transform-origin: left;
+  }
+  .btn--link:hover::before,
+  .btn--link:focus-visible::before {
+    transform: scaleX(1);
+  }
+  .btn[disabled],
+  .btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn[disabled]::before {
+    display: none;
+  }
+</style>

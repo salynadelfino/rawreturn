@@ -1,0 +1,73 @@
+---
+/**
+ * A photograph in a frame: masked reveal on entry, optional parallax, and a
+ * contact-sheet caption (first line mono, a fact; second line optional).
+ */
+import Img from './Img.astro';
+
+interface Props {
+  src: string;
+  alt: string;
+  ratio?: string; // e.g. '4/5', '3/2', '16/9'
+  caption?: string;
+  captionAside?: string;
+  sizes?: string;
+  parallax?: number;
+  reveal?: 'mask' | 'mask-side' | 'fade' | 'none';
+  eager?: boolean;
+  position?: string;
+  class?: string;
+  cursor?: string;
+  i?: number;
+}
+const {
+  src,
+  alt,
+  ratio = '4/5',
+  caption,
+  captionAside,
+  sizes = '(min-width: 900px) 50vw, 100vw',
+  parallax,
+  reveal = 'mask',
+  eager = false,
+  position,
+  class: cls,
+  cursor,
+  i = 0,
+} = Astro.props;
+---
+
+<figure class:list={['ei', cls]}>
+  <div
+    class="frame ei-frame"
+    style={`aspect-ratio:${ratio};--i:${i}`}
+    data-reveal={reveal === 'none' ? undefined : reveal}
+    data-cursor={cursor}
+  >
+    <div class="ei-inner" data-parallax={parallax}>
+      <Img src={src} alt={alt} sizes={sizes} loading={eager ? 'eager' : 'lazy'} position={position} />
+    </div>
+  </div>
+  {
+    caption && (
+      <figcaption class="caption mono mono--s">
+        <span>{caption}</span>
+        {captionAside && <span>{captionAside}</span>}
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .ei-inner {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+  .ei-inner :global(img),
+  .ei-inner :global(.img-missing) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

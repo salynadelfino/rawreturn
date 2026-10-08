@@ -1,0 +1,188 @@
+---
+/**
+ * Product card — a catalogued object, not a tile.
+ * Default: number, name, clean product view.
+ * Hover / focus: the record (garments, hours, edition, status) and the image
+ * changes to a construction detail or the piece returned to the street.
+ */
+import Img from './Img.astro';
+import Status from './Status.astro';
+import type { Piece } from '../data/pieces';
+import { formatPrice, editionLabel } from '../data/pieces';
+import { hasImage } from '../data/images';
+
+interface Props {
+  piece: Piece;
+  i?: number;
+  sizes?: string;
+  eager?: boolean;
+  ratio?: string;
+  class?: string;
+}
+const {
+  piece: p,
+  i = 0,
+  sizes = '(min-width: 1200px) 33vw, (min-width: 700px) 50vw, 100vw',
+  eager = false,
+  ratio = '4/5',
+  class: cls,
+} = Astro.props;
+const second = [p.images.returned, p.images.detail, p.images.back].find((k) => hasImage(k));
+const secondAlt = second === p.images.returned ? p.alt.returned : second === p.images.detail ? p.alt.detail : p.alt.back;
+---
+
+<article class:list={['card', cls]} data-reveal style={`--i:${i % 3}`}>
+  <a href={`/archive/${p.slug}`} class="card-link" data-cursor={`${p.no} →`}>
+    <div class="card-img frame" style={`aspect-ratio:${ratio}`}>
+      <div class="img-a" transition:name={`img-${p.slug}`}>
+        <Img src={p.images.front} alt={p.alt.front} sizes={sizes} loading={eager ? 'eager' : 'lazy'} />
+      </div>
+      {
+        second && (
+          <div class="img-b" aria-hidden="true">
+            <Img src={second} alt={secondAlt ?? ''} sizes={sizes} />
+          </div>
+        )
+      }
+      <span class="card-no-float mono mono--m">{p.no}</span>
+    </div>
+
+    <div class="card-info">
+      <div class="card-default">
+        <p class="record card-no">{p.no}</p>
+        <h3 class="stamp card-name">{p.name}</h3>
+      </div>
+      <dl class="card-hover record" aria-label={`${p.no} record`}>
+        <div><dt class="visually-hidden">First life</dt><dd>{p.garments} garments</dd></div>
+        <div><dt class="visually-hidden">Hours</dt><dd>{p.hours ? `${p.hours} hours` : 'Hours: running'}</dd></div>
+        <div><dt class="visually-hidden">Edition</dt><dd>{editionLabel(p)}</dd></div>
+      </dl>
+      <div class="card-meta">
+        <span class="record">{p.status === 'available' ? formatPrice(p.price) : p.returned ? `Worn by ${p.returned.by}` : '—'}</span>
+        <Status status={p.status} size="s" />
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .card-link {
+    display: grid;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-img {
+    position: relative;
+  }
+  .img-a,
+  .img-b {
+    position: absolute;
+    inset: 0;
+  }
+  .img-a :global(img),
+  .img-b :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .img-b {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transition:
+      clip-path var(--dur-3) var(--ease-in-out),
+      opacity 0s linear var(--dur-3);
+  }
+  .card-no-float {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    padding: 5px 7px 4px;
+    background: var(--ecru);
+    color: var(--charcoal);
+    letter-spacing: 0.1em;
+    transform: translateY(-8px);
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+  .card-info {
+    position: relative;
+    display: grid;
+    gap: 10px;
+  }
+  .card-default,
+  .card-hover {
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+  .card-no {
+    color: var(--ink-soft);
+  }
+  .card-name {
+    font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+    margin-top: 4px;
+  }
+  .card-hover {
+    position: absolute;
+    inset: 0 0 auto;
+    display: grid;
+    gap: 2px;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .card-hover dd {
+    margin: 0;
+  }
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+  }
+
+  @media (hover: hover) and (min-width: 900px) {
+    .card-link:hover .img-b,
+    .card-link:focus-visible .img-b {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      transition:
+        clip-path var(--dur-3) var(--ease-in-out),
+        opacity 0s;
+    }
+    .card-link:hover .img-b :global(img) {
+      transform: scale(1.03);
+    }
+    .card-link:hover .card-no-float,
+    .card-link:focus-visible .card-no-float {
+      opacity: 1;
+      transform: none;
+    }
+    .card-link:hover .card-default,
+    .card-link:focus-visible .card-default {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    .card-link:hover .card-hover,
+    .card-link:focus-visible .card-hover {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* touch / small screens: no hover — show the record beneath the name instead */
+  @media (hover: none), (max-width: 899px) {
+    .card-hover {
+      position: static;
+      opacity: 1;
+      transform: none;
+      display: flex;
+      gap: 14px;
+      color: var(--ink-soft);
+    }
+  }
+</style>

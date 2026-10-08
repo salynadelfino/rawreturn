@@ -1,0 +1,192 @@
+---
+/**
+ * A process sequence scrolled as a numbered contact sheet. On desktop the
+ * section pins and the strip travels horizontally as you scroll; on mobile
+ * and under reduced motion it is a native swipe with scroll-snap.
+ */
+import Img from './Img.astro';
+
+interface Frame {
+  image: string;
+  alt: string;
+  n: string;
+  label: string;
+  note?: string;
+}
+interface Props {
+  frames: Frame[];
+  title: string;
+  kicker?: string;
+  id?: string;
+}
+const { frames, title, kicker, id } = Astro.props;
+---
+
+<section class="cs on-indigo" data-hscroll data-tone="dark" id={id} aria-label={title}>
+  <div class="cs-sticky">
+    <div class="cs-head wrap">
+      <p class="mono mono--m">{kicker}</p>
+      <p class="mono mono--m cs-count" aria-hidden="true">
+        <span data-hscroll-count data-total={frames.length}>01</span> / {String(frames.length).padStart(2, '0')}
+      </p>
+    </div>
+    <div class="cs-viewport" tabindex="0" aria-label={`${title} — scroll sideways`}>
+      <ol role="list" class="cs-track" data-hscroll-track>
+        <li class="cs-title">
+          <h2 class="stamp cs-h">{title}</h2>
+          <p class="mono meta cs-hint">Scroll →</p>
+        </li>
+        {
+          frames.map((f, i) => (
+            <li class="cs-frame" style={`--i:${i}`}>
+              <figure>
+                <div class="frame cs-img">
+                  <Img src={f.image} alt={f.alt} sizes="(min-width: 900px) 46vw, 86vw" />
+                  <span class="cs-n mono mono--m">{f.n}</span>
+                </div>
+                <figcaption>
+                  <p class="stamp cs-label">{f.label}</p>
+                  {f.note && <p class="cs-note">{f.note}</p>}
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+    <div class="cs-progress" aria-hidden="true"><span data-hscroll-progress></span></div>
+  </div>
+</section>
+
+<style>
+  .cs {
+    position: relative;
+  }
+  .cs-sticky {
+    padding-block: clamp(56px, 8vw, 96px) 40px;
+  }
+  :global(.cs[data-pinned]) .cs-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: calc(var(--header-h) + 12px) 28px;
+  }
+  .cs-head {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    color: var(--faded-blue);
+    letter-spacing: 0.1em;
+  }
+  .cs-viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cs-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  :global(.cs[data-pinned]) .cs-viewport {
+    overflow: visible;
+  }
+  .cs-track {
+    display: flex;
+    gap: var(--gutter);
+    padding-inline: var(--pad);
+    width: max-content;
+    will-change: transform;
+  }
+  .cs-title {
+    width: min(78vw, 520px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    scroll-snap-align: start;
+    padding-right: 4vw;
+  }
+  .cs-h {
+    font-size: clamp(2.2rem, 4.6vw, 5.2rem);
+    max-width: 8ch;
+  }
+  @media (min-width: 900px) {
+    .cs-title {
+      width: 34vw;
+    }
+  }
+  .cs-frame {
+    width: min(86vw, 46vw + 200px);
+    scroll-snap-align: start;
+  }
+  @media (min-width: 900px) {
+    .cs-frame {
+      width: 44vw;
+    }
+    .cs-frame:nth-child(odd) {
+      margin-top: 6vh;
+    }
+  }
+  .cs-img {
+    aspect-ratio: 3/2;
+    position: relative;
+  }
+  :global(.cs[data-pinned]) .cs-img {
+    height: min(58vh, 44vw * 0.6667);
+    aspect-ratio: auto;
+  }
+  .cs-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cs-n {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 6px 3px;
+    background: var(--ecru);
+    color: var(--charcoal);
+    letter-spacing: 0.1em;
+  }
+  figcaption {
+    display: grid;
+    grid-template-columns: minmax(8ch, 0.6fr) 1fr;
+    gap: var(--gutter);
+    padding-top: 14px;
+  }
+  .cs-label {
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+  }
+  .cs-note {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 44ch;
+  }
+  .cs-progress {
+    margin: 22px var(--pad) 0;
+    height: 2px;
+    background: var(--rule);
+  }
+  .cs-progress span {
+    display: block;
+    height: 100%;
+    background: var(--stitch);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  @media (max-width: 899px) {
+    figcaption {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .cs-progress {
+      display: none;
+    }
+  }
+</style>

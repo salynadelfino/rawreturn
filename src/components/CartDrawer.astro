@@ -1,0 +1,244 @@
+---
+/**
+ * The bag. A dialog that slides from the right. State lives in localStorage
+ * (src/scripts/cart.ts); this component ships the catalogue it needs as JSON.
+ */
+import { getImage as optimise } from 'astro:assets';
+import pieces, { editionLabel } from '../data/pieces';
+import { getImage } from '../data/images';
+import Button from './Button.astro';
+
+const catalogue = await Promise.all(
+  pieces
+    .filter((p) => p.status === 'available')
+    .map(async (p) => {
+      const meta = getImage(p.images.front);
+      const thumb = meta ? await optimise({ src: meta, width: 240, format: 'webp', quality: 70 }) : null;
+      return {
+        slug: p.slug,
+        no: p.no,
+        name: p.name,
+        price: p.price ?? 0,
+        max: p.edition.remaining,
+        edition: editionLabel(p),
+        thumb: thumb?.src ?? '',
+      };
+    }),
+);
+---
+
+<div class="bag-root" data-bag-root transition:persist="bag">
+  <div class="scrim" data-bag-close aria-hidden="true"></div>
+  <aside
+    class="drawer"
+    id="bag"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="bag-title"
+    data-bag
+    tabindex="-1"
+    hidden
+  >
+    <header class="d-head">
+      <h2 id="bag-title" class="stamp">Bag <span class="mono" data-bag-count-label>(0)</span></h2>
+      <button type="button" class="close mono mono--m" data-bag-close>Close</button>
+    </header>
+    <hr class="stitch" />
+
+    <div class="d-body" data-bag-body>
+      <p class="empty" data-bag-empty>
+        <span class="voice">Nothing in here yet.</span>
+        <span class="mono meta">Everything currently available is in the shop.</span>
+      </p>
+      <ol role="list" class="lines" data-bag-lines></ol>
+    </div>
+
+    <footer class="d-foot">
+      <dl class="totals record">
+        <div><dt>Subtotal</dt><dd data-bag-subtotal>£0</dd></div>
+        <div><dt>Shipping</dt><dd>Calculated next</dd></div>
+      </dl>
+      <p class="mono mono--s meta ship">
+        Shipped from London in grey board and tan tape. UK 2–3 days, tracked. Worldwide on request.
+      </p>
+      <Button href="/checkout" class="checkout" data-bag-checkout>Checkout</Button>
+    </footer>
+  </aside>
+
+  <template data-bag-line-tpl>
+    <li class="line">
+      <a class="l-img" data-l-link><img alt="" width="96" height="120" data-l-img /></a>
+      <div class="l-info">
+        <p class="record"><span data-l-no></span> · <span data-l-ed></span></p>
+        <p class="stamp l-name" data-l-name></p>
+        <div class="l-row">
+          <div class="qty" data-l-qty>
+            <button type="button" class="mono" data-l-dec aria-label="Decrease quantity">−</button>
+            <output class="mono" data-l-count aria-live="polite">1</output>
+            <button type="button" class="mono" data-l-inc aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="remove mono mono--s" data-l-remove>Remove</button>
+        </div>
+      </div>
+      <p class="record l-price" data-l-price></p>
+    </li>
+  </template>
+
+  <script type="application/json" data-bag-catalogue set:html={JSON.stringify(catalogue)} />
+  <p class="visually-hidden" aria-live="polite" data-bag-announce></p>
+</div>
+
+<style>
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    background: rgba(18, 18, 18, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+  :global(.bag-root.is-open) .scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+    width: min(460px, 100vw);
+    display: flex;
+    flex-direction: column;
+    background: var(--ground);
+    color: var(--ink);
+    border-left: 1px solid var(--rule-strong);
+    transform: translateX(100%);
+    transition: transform var(--dur-3) var(--ease-out);
+  }
+  .drawer:not([hidden]) {
+    display: flex;
+  }
+  :global(.bag-root.is-open) .drawer {
+    transform: none;
+  }
+  .drawer:focus {
+    outline: none;
+  }
+  .d-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 22px var(--pad) 18px;
+  }
+  .d-head h2 {
+    font-size: 1.6rem;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .close {
+    background: none;
+    border: 0;
+    padding: 8px 0;
+    letter-spacing: 0.1em;
+  }
+  .d-body {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px var(--pad);
+  }
+  .empty {
+    display: grid;
+    gap: 10px;
+    padding: 32px 0;
+  }
+  .lines .line {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    animation: line-in var(--dur-3) var(--ease-out);
+  }
+  @keyframes line-in {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+  .l-img img {
+    width: 96px;
+    height: 120px;
+    object-fit: cover;
+    background: var(--stone);
+  }
+  .l-name {
+    font-size: 1rem;
+    margin: 6px 0 12px;
+  }
+  .l-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--rule-strong);
+  }
+  .qty button {
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 0;
+    font-size: 15px;
+  }
+  .qty button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .qty output {
+    min-width: 24px;
+    text-align: center;
+  }
+  .qty[data-fixed] {
+    border-style: dashed;
+  }
+  .remove {
+    background: none;
+    border: 0;
+    padding: 8px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--ink-soft);
+  }
+  .d-foot {
+    padding: 18px var(--pad) calc(18px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--rule-strong);
+    display: grid;
+    gap: 14px;
+  }
+  .totals div {
+    display: flex;
+    justify-content: space-between;
+  }
+  .totals dd {
+    margin: 0;
+  }
+  .ship {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .checkout {
+    width: 100%;
+  }
+  :global(.bag-root[data-empty]) .d-foot {
+    display: none;
+  }
+  :global(.bag-root:not([data-empty])) .empty {
+    display: none;
+  }
+</style>

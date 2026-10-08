@@ -1,0 +1,40 @@
+---
+/** The founder speaking. Newsreader Italic, never bold, never uppercase. */
+interface Props {
+  quote: string;
+  cite?: string;
+  size?: 'm' | 'l';
+  class?: string;
+}
+const { quote, cite, size = 'm', class: cls } = Astro.props;
+---
+
+<figure class:list={['fq', cls]} data-reveal>
+  <blockquote class:list={['voice', size === 'l' && 'voice--l']}>
+    <p>{quote}</p>
+  </blockquote>
+  {cite && <figcaption class="mono mono--s meta">— {cite}</figcaption>}
+</figure>
+
+<style>
+  .fq {
+    display: grid;
+    gap: 18px;
+  }
+  blockquote {
+    margin: 0;
+    max-width: 26ch;
+  }
+  .voice--l {
+    max-width: 22ch;
+  }
+  blockquote p {
+    text-indent: -0.4em;
+  }
+  blockquote p::before {
+    content: '“';
+  }
+  blockquote p::after {
+    content: '”';
+  }
+</style>

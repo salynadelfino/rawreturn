@@ -1,0 +1,62 @@
+---
+/**
+ * Technical record. IBM Plex Mono, uppercase, tabular figures.
+ * rows: [label, value | value[]]. The tan stitch can divide halves.
+ */
+interface Props {
+  rows: Array<[string, string | string[] | null | undefined] | 'stitch'>;
+  class?: string;
+  title?: string;
+}
+const { rows, class: cls, title } = Astro.props;
+---
+
+<div class:list={['spec', cls]}>
+  {title && <p class="mono mono--m spec-title">{title}</p>}
+  <dl class="record">
+    {
+      rows.map((r, i) =>
+        r === 'stitch' ? (
+          <hr class="stitch spec-stitch" />
+        ) : r[1] === null || r[1] === undefined ? null : (
+          <div class="spec-row" data-reveal="fade" style={`--i:${i}`}>
+            <dt>{r[0]}</dt>
+            <dd>
+              {Array.isArray(r[1])
+                ? r[1].map((v) => (
+                    <span>
+                      {v}
+                      <br />
+                    </span>
+                  ))
+                : r[1]}
+            </dd>
+          </div>
+        ),
+      )
+    }
+  </dl>
+</div>
+
+<style>
+  .spec-title {
+    letter-spacing: 0.1em;
+    padding-bottom: 10px;
+  }
+  .spec-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 38%) 1fr;
+    gap: 12px;
+    padding: 9px 0 8px;
+    border-top: 1px solid var(--rule);
+  }
+  dt {
+    color: var(--ink-soft);
+  }
+  dd {
+    margin: 0;
+  }
+  .spec-stitch {
+    margin: 10px 0;
+  }
+</style>

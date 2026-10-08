@@ -1,0 +1,217 @@
+---
+/**
+ * Process — seven stages, in the order they happen. Each stage: photograph,
+ * the founder's commentary, the technical facts. The stage name stays pinned
+ * while its material scrolls past.
+ */
+import Base from '../layouts/Base.astro';
+import Lines from '../components/Lines.astro';
+import EditorialImage from '../components/EditorialImage.astro';
+import SpecBlock from '../components/SpecBlock.astro';
+import Button from '../components/Button.astro';
+import stages from '../data/process';
+---
+
+<Base title="Process" description="Find, unpick, study, cut, rebuild, record, return. How a Raw Return piece is made, stage by stage, failures included.">
+  <section class="open wrap">
+    <div class="open-row mono mono--m meta">
+      <span>Process</span>
+      <span>07 stages · failures included</span>
+    </div>
+    <Lines as="h1" class="stamp mega" lines={['Taken apart.', 'Rebuilt.']} />
+    <nav class="index" aria-label="Stages">
+      <ol role="list" class="mono mono--m">
+        {
+          stages.map((s, i) => (
+            <li data-reveal="fade" style={`--i:${i}`}>
+              <a href={`#stage-${s.n}`}>
+                <span class="meta">{s.n}</span> {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+  </section>
+
+  <ol role="list" class="stages">
+    {
+      stages.map((s, i) => (
+        <li class:list={['stage', i % 2 && 'stage--alt', s.n === '07' && 'stage--night on-night']} id={`stage-${s.n}`} data-tone={s.n === '07' ? 'dark' : undefined}>
+          <div class="wrap grid stage-grid">
+            <header class="stage-head">
+              <div class="stage-pin">
+                <p class="stamp stage-n" aria-hidden="true">{s.n}</p>
+                <h2 class="stamp stage-name">{s.name}</h2>
+              </div>
+            </header>
+            <div class="stage-img">
+              <EditorialImage
+                src={s.image}
+                alt={s.alt}
+                ratio={i % 3 === 1 ? '4/5' : '3/2'}
+                sizes="(min-width: 900px) 58vw, 100vw"
+                caption={`${s.n} — ${s.caption}`}
+                captionAside={s.n === '07' ? 'Direct flash' : 'Available light'}
+                parallax={0.06}
+                eager={i === 0}
+              />
+            </div>
+            <div class="stage-text">
+              <p class="voice stage-note" data-reveal>{s.note}</p>
+              <SpecBlock rows={s.facts} />
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+
+  <section class="failed wrap" aria-labelledby="failed-title">
+    <div class="grid f-grid">
+      <div class="f-text">
+        <p class="mono mono--m meta">Not a stage. Part of every stage.</p>
+        <Lines as="h2" id="failed-title" class="stamp display" lines={['Failed.']} />
+        <p class="body-copy" data-reveal>
+          Attempts that don’t work come off and go on the wall, and they go on the record too. The series is called Failed
+          and it is the most useful thing published here.
+        </p>
+        <Button href="/notes?series=Failed" variant="outline">Read Failed</Button>
+      </div>
+      <div class="f-img">
+        <EditorialImage
+          src="process/failed-sleeves"
+          alt="Three sleeves hanging from bulldog clips on a plaster wall, tagged attempt 1, 2 and 3."
+          ratio="3/2"
+          sizes="(min-width: 900px) 58vw, 100vw"
+          caption="RR-014 · left sleeve × 3"
+          captionAside="The first two are still here"
+        />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .open {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(40px, 6vw, 80px);
+    display: grid;
+    gap: clamp(20px, 3vw, 36px);
+  }
+  .open-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .index ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+  }
+  .index a {
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+  .index a:hover {
+    text-decoration: underline;
+  }
+  .stage {
+    border-top: 1px solid var(--rule-strong);
+    padding-block: clamp(48px, 7vw, 110px);
+  }
+  .stage-grid {
+    row-gap: 32px;
+    align-items: start;
+  }
+  .stage-head {
+    grid-column: 1 / span 3;
+    align-self: stretch;
+  }
+  .stage-pin {
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+    display: grid;
+    gap: 6px;
+  }
+  .stage-n {
+    font-size: clamp(4rem, 9vw, 10rem);
+    line-height: 0.8;
+    color: var(--raw-indigo);
+  }
+  .stage-name {
+    font-size: clamp(1.5rem, 2.4vw, 2.6rem);
+  }
+  .stage--night .stage-n {
+    color: var(--hide);
+  }
+  .stage-img {
+    grid-column: 4 / span 6;
+  }
+  .stage-text {
+    grid-column: 10 / span 3;
+    display: grid;
+    gap: 28px;
+    padding-top: 10vh;
+  }
+  .stage-note {
+    font-size: clamp(1.2rem, 1.7vw, 1.55rem);
+  }
+  .stage--alt .stage-img {
+    grid-column: 6 / span 7;
+    grid-row: 1;
+  }
+  .stage--alt .stage-text {
+    grid-column: 4 / span 2;
+    grid-row: 1;
+    padding-top: 24vh;
+  }
+  @media (min-width: 900px) {
+    .stage--alt .stage-text {
+      grid-column: 3 / span 3;
+    }
+    .stage--alt .stage-head {
+      grid-column: 1 / span 2;
+    }
+  }
+  .failed {
+    padding-block: clamp(72px, 10vw, 150px);
+    border-top: 1px solid var(--rule-strong);
+  }
+  .f-grid {
+    row-gap: 40px;
+    align-items: end;
+  }
+  .f-text {
+    grid-column: 1 / span 4;
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+  }
+  .f-img {
+    grid-column: 6 / span 7;
+  }
+  @media (max-width: 899px) {
+    .stage-head,
+    .stage-img,
+    .stage-text,
+    .stage--alt .stage-img,
+    .stage--alt .stage-text,
+    .f-text,
+    .f-img {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      padding-top: 0;
+    }
+    .stage-pin {
+      position: static;
+      grid-template-columns: auto 1fr;
+      align-items: end;
+      gap: 16px;
+    }
+    .stage-n {
+      font-size: 4rem;
+    }
+  }
+</style>

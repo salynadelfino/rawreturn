@@ -1,0 +1,118 @@
+---
+/**
+ * The piece record — two halves, First life / Second life, divided by the tan
+ * stitch. Template for the care label, hang tag, product page and archive.
+ */
+import Wordmark from './Wordmark.astro';
+import Status from './Status.astro';
+import type { Piece } from '../data/pieces';
+import { editionLabel } from '../data/pieces';
+
+interface Props {
+  piece: Piece;
+  class?: string;
+  compact?: boolean;
+}
+const { piece: p, class: cls, compact = false } = Astro.props;
+---
+
+<article class:list={['rec', compact && 'rec--compact', cls]} aria-label={`Record ${p.no}`}>
+  <header class="rec-head">
+    <Wordmark variant="stacked" class="rec-wm" />
+    <div class="rec-no">
+      <p class="stamp">{p.no}</p>
+      <p class="record">Edition {editionLabel(p)}</p>
+    </div>
+  </header>
+  <div class="rec-halves">
+    <section class="half" aria-label="First life">
+      <h3 class="record mono--m">First life</h3>
+      <ul role="list" class="record">
+        {p.firstLife.map((l) => <li>{l}</li>)}
+        <li class="meta">Found: {p.found.place}</li>
+        <li class="meta">Date: {p.found.date}</li>
+      </ul>
+    </section>
+    <div class="rec-stitch" aria-hidden="true"></div>
+    <section class="half" aria-label="Second life">
+      <h3 class="record mono--m">Second life</h3>
+      <ul role="list" class="record">
+        <li>{p.name}</li>
+        {p.panels && <li>{p.panels} panels</li>}
+        <li>Hours: {p.hours ?? '—'}</li>
+        {p.attempts && <li>Attempts: {p.attempts}</li>}
+        {p.returned ? <li class="meta">Returned: {p.returned.date}</li> : <li class="meta">Started: {p.started}</li>}
+      </ul>
+    </section>
+  </div>
+  <footer class="rec-foot record">
+    <span>Reclaimed denim · London</span>
+    <Status status={p.status} size="s" />
+  </footer>
+</article>
+
+<style>
+  .rec {
+    background: var(--ecru);
+    color: var(--charcoal);
+    border: 1px solid var(--rule-strong);
+    padding: clamp(16px, 2vw, 28px);
+    display: grid;
+    gap: 22px;
+    --ink-soft: #57544e;
+    --rule: rgba(43, 43, 43, 0.22);
+    --ink: var(--charcoal);
+  }
+  .rec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .rec-head :global(.rec-wm) {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    color: var(--raw-indigo);
+  }
+  .rec-no {
+    text-align: right;
+  }
+  .rec-no .stamp {
+    font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+    color: var(--raw-indigo);
+  }
+  .rec-halves {
+    display: grid;
+    grid-template-columns: 1fr 2px 1fr;
+    gap: clamp(14px, 2vw, 28px);
+  }
+  .rec-stitch {
+    background: var(--stitch-v);
+  }
+  .half h3 {
+    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+  }
+  .half ul {
+    display: grid;
+    gap: 4px;
+  }
+  .rec-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+  .rec--compact .rec-head :global(.rec-wm) {
+    display: none;
+  }
+  @media (max-width: 520px) {
+    .rec-halves {
+      grid-template-columns: 1fr;
+    }
+    .rec-stitch {
+      height: 2px;
+      background: var(--stitch);
+    }
+  }
+</style>

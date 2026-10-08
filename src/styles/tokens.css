@@ -1,0 +1,81 @@
+/*
+ * Raw Return — design tokens.
+ * Source of truth: Raw Return Brand Identity Direction (October 2026), §09–§12, §18.
+ * Ground is ecru paper. Blue comes from the denim in the photographs, not the UI.
+ * Return Tan appears once per surface: the AVAILABLE state, the stitch, the patch.
+ */
+:root {
+  /* Primary — indigo & paper (~70%) */
+  --raw-indigo: #1f2a44;
+  --worn-indigo: #3d5a80;
+  --faded-blue: #8fa6bf;
+  --ecru: #ede6d8;
+
+  /* Secondary — workshop & hardware (~25%) */
+  --stone: #c8c1b3;
+  --concrete: #8a8781;
+  --charcoal: #2b2b2b;
+  --black-thread: #121212;
+  --steel: #9a9ea3;
+  --rivet-brass: #8c7a5b;
+
+  /* Accent — the signature (≤5%) */
+  --return-tan: #c9682f;
+  --saddle: #8a4520;
+  --hide: #e3a877;
+
+  /* Roles */
+  --ground: var(--ecru);
+  --ground-2: #e4dccb; /* ecru, one sheet down */
+  --ink: var(--charcoal);
+  --ink-soft: #57544e; /* meta text on ecru, 6.2:1 */
+  --rule: rgba(43, 43, 43, 0.22);
+  --rule-strong: rgba(43, 43, 43, 0.55);
+  --night: #0c111d; /* the street section: deep navy, never flat black */
+
+  /* Type */
+  --font-stamp: 'Archivo Variable', 'Archivo', 'Arial Black', sans-serif;
+  --font-body: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-voice: 'Newsreader', 'Times New Roman', Georgia, serif;
+
+  --t-mega: clamp(3.1rem, 12.2vw, 13.5rem);
+  --t-display: clamp(2.5rem, 7.4vw, 7.6rem);
+  --t-h1: clamp(2rem, 4.8vw, 4.8rem);
+  --t-h2: clamp(1.45rem, 2.9vw, 2.6rem);
+  --t-h3: clamp(1.05rem, 1.4vw, 1.3rem);
+  --t-body: 1.0625rem;
+  --t-lede: clamp(1.15rem, 1.6vw, 1.4rem);
+  --t-voice: clamp(1.45rem, 2.7vw, 2.5rem);
+  --t-voice-l: clamp(1.9rem, 4.2vw, 4rem);
+  --t-mono: 0.75rem;
+  --t-mono-s: 0.6875rem;
+
+  /* Grid — a ledger: 12 columns, hairline rules */
+  --cols: 12;
+  --gutter: clamp(12px, 1.6vw, 24px);
+  --pad: clamp(16px, 3.2vw, 48px);
+  --max: 1680px;
+  --header-h: 56px;
+
+  /* Motion — considered, never decorative */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 180ms;
+  --dur-2: 420ms;
+  --dur-3: 900ms;
+  --dur-4: 1400ms;
+
+  /* The stitch: tan dashed rule — the only decorative line in the system */
+  --stitch: repeating-linear-gradient(90deg, var(--return-tan) 0 7px, transparent 7px 11px);
+  --stitch-v: repeating-linear-gradient(180deg, var(--return-tan) 0 7px, transparent 7px 11px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+    --dur-4: 0ms;
+  }
+}

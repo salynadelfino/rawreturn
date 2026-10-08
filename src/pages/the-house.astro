@@ -1,0 +1,375 @@
+---
+/**
+ * The House — not "About us". The founder narrates, in the first person.
+ * PLACEHOLDER: the founder's own story (how they learned, why they started)
+ * must be written by the founder. The paragraphs marked below hold the shape.
+ */
+import Base from '../layouts/Base.astro';
+import Lines from '../components/Lines.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import EditorialImage from '../components/EditorialImage.astro';
+import FounderQuote from '../components/FounderQuote.astro';
+import Button from '../components/Button.astro';
+import pieces, { totals } from '../data/pieces';
+
+const t = totals();
+// where the first lives came from — straight from the records
+const places = Object.entries(
+  pieces.reduce<Record<string, number>>((acc, p) => {
+    const place = p.found.place.replace(/^The (pile|bench),?\s*/i, '').trim() || 'The bench';
+    acc[place] = (acc[place] ?? 0) + p.garments;
+    return acc;
+  }, {}),
+).sort((a, b) => b[1] - a[1]);
+
+const pillars = [
+  { n: '01 → 02', name: 'The material', d: 'Denim that has already lived. Chosen for its wear, weight and history. The evidence is kept, never faked.' },
+  { n: '02 → 03', name: 'The process', d: 'Deconstruction, experiment, reconstruction. Shown in full, including the attempts that didn’t work.' },
+  { n: '03 → 04', name: 'The hand', d: 'One person’s decisions. Present through the work, not in front of a camera.' },
+  { n: '04 → 01', name: 'The return', d: 'Every piece goes back out. And when it’s worn out, it can come back to be rebuilt again.' },
+];
+const checks = [
+  'Every piece starts as identifiable garments, listed by name on its record.',
+  'Made by hand in London. Hours and attempts are logged.',
+  'The process is published as it happens, failures included.',
+  'One of one, or small numbered editions. Numbers never repeat.',
+  'Original wear is kept as found. Nothing is artificially distressed.',
+];
+---
+
+<Base title="The House" description="Raw Return is a denim house in London. Everything starts as something else — taken apart by hand and rebuilt into pieces that didn't exist before.">
+  <section class="open wrap">
+    <div class="open-row mono mono--m meta">
+      <span>The house</span>
+      <span>London · Est. 2025</span>
+    </div>
+    <Lines as="h1" class="stamp mega" lines={['Made from', 'what already', 'exists.']} />
+  </section>
+
+  <section class="intro wrap grid" aria-label="Raw Return">
+    <div class="intro-img">
+      <!-- PLACEHOLDER: replace with the workshop — wide, available light, the bench and the wall of attempts. -->
+      <EditorialImage
+        src="workshop/bench-day"
+        alt="The cutting table in daylight: denim panels from different jeans pinned together over pattern paper, shears and a tape measure."
+        ratio="3/2"
+        sizes="(min-width: 900px) 58vw, 100vw"
+        caption="The workshop, London"
+        captionAside="Available light"
+        eager
+      />
+    </div>
+    <div class="intro-text body-copy" data-reveal>
+      <p class="lede">
+        Raw Return is a denim house in London. Everything we make starts as something else: jeans, jackets and offcuts
+        that have already been worn, faded and thrown away.
+      </p>
+      <p>
+        We take them apart by hand and build pieces that didn’t exist before. We keep the evidence of the first life — the
+        fade, the repair, the ghost of a back pocket — because that’s the material. Every piece is numbered and recorded.
+        Most are one of one. When they’re finished, they go back out.
+      </p>
+    </div>
+  </section>
+
+  <section class="founder section wrap" aria-labelledby="founder-title">
+    <SectionLabel n="01" label="The founder" aside="In the first person" />
+    <div class="grid f-grid">
+      <h2 id="founder-title" class="visually-hidden">The founder</h2>
+      <div class="f-quote">
+        <FounderQuote quote="I don’t start with a blank piece of fabric. I start with what is already there." size="l" />
+      </div>
+      <div class="f-text body-copy" data-reveal>
+        <!-- PLACEHOLDER: the founder's own words — how they learned, when they started, why denim. Keep it this length. -->
+        <p>
+          Every pair of jeans in the pile has already had a life. Somebody bought it, wore it, sat in it, faded it at the
+          knee and left the outline of a phone on the back pocket. Then it was thrown out. That’s where I start.
+        </p>
+        <p>
+          I take each garment apart seam by seam, wash it, measure it and test it against the others. Then I rebuild it
+          into something that didn’t exist before: a jacket cut from four pairs of jeans, a trouser that holds thirty years
+          of fading in one leg.
+        </p>
+        <p>
+          I show all of it, including the parts that go wrong. The left sleeve on RR-014 took three attempts. The first two
+          are still on the wall.
+        </p>
+      </div>
+      <div class="f-img">
+        <!-- PLACEHOLDER: the founder at work — hands, from behind or side-on. -->
+        <EditorialImage
+          src="founder/founder-hands-chalk"
+          alt="Chalk lines and notches on raw indigo denim beside a steel ruler and tailor’s shears."
+          ratio="4/5"
+          sizes="(min-width: 900px) 30vw, 70vw"
+          caption="Marking up, RR-015"
+          parallax={0.06}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="london on-indigo" data-tone="dark" aria-labelledby="london-title">
+    <div class="wrap section">
+      <SectionLabel n="02" label="London" aside="Where the first lives came from" />
+      <div class="grid l-grid">
+        <div class="l-text">
+          <Lines as="h2" id="london-title" class="stamp display" lines={['Taken apart', 'in London.', 'Rebuilt', 'in London.']} />
+          <p class="body-copy" data-reveal>
+            The denim is found around the city, in piles, markets and clear-outs. The finished pieces go back out onto the
+            same streets. The list on the right is generated from the records.
+          </p>
+        </div>
+        <table class="l-table record">
+          <caption class="visually-hidden">Garments found, by place</caption>
+          <thead><tr><th scope="col">Found</th><th scope="col">Garments</th></tr></thead>
+          <tbody>
+            {
+              places.map(([place, n], i) => (
+                <tr data-reveal="fade" style={`--i:${i}`}>
+                  <th scope="row">{place}</th>
+                  <td>{String(n).padStart(2, '0')}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+          <tfoot><tr><th scope="row">Total</th><td>{t.garments}</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="one section wrap" aria-labelledby="one-title">
+    <SectionLabel n="03" label="One of one" />
+    <div class="grid one-grid">
+      <Lines as="h2" id="one-title" class="stamp h1 one-title" lines={['No two.', 'No repeats.']} />
+      <div class="one-text body-copy" data-reveal>
+        <p class="lede">The material decides. Two pairs of 501s are never faded the same way, so two jackets made from them can’t be either.</p>
+        <p>
+          When a shape works, it can come back as a small numbered edition — the Waistband Belt is eight — but every piece
+          still gets its own number and its own record.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pillars wrap" aria-labelledby="pillars-title">
+    <SectionLabel n="04" label="How the house works" aside="Read as a loop" />
+    <h2 id="pillars-title" class="visually-hidden">Four pillars</h2>
+    <ol role="list" class="p-list">
+      {
+        pillars.map((p, i) => (
+          <li data-reveal style={`--i:${i}`}>
+            <p class="mono meta">{p.n}</p>
+            <h3 class="stamp h2">{p.name}</h3>
+            <p>{p.d}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="checks section wrap" aria-labelledby="checks-title">
+    <SectionLabel n="05" label="What you can check" />
+    <div class="grid c-grid">
+      <h2 id="checks-title" class="voice c-title" data-reveal>Facts carry the persuasion. Here are the ones you can hold us to.</h2>
+      <ol role="list" class="c-list">
+        {
+          checks.map((c, i) => (
+            <li data-reveal style={`--i:${i}`}>
+              <span class="mono meta">{String(i + 1).padStart(2, '0')}</span>
+              <span>{c}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="returns on-stone" id="returns" aria-labelledby="returns-title">
+    <div class="wrap section">
+      <SectionLabel n="06" label="Bring it back" aside="Wear in. Not out." />
+      <div class="grid r-grid">
+        <Lines as="h2" id="returns-title" class="stamp display r-title" lines={['Bring it back', 'when it’s done.']} />
+        <div class="r-text body-copy" data-reveal>
+          <p class="lede">Any Raw Return piece can come back to the bench, whenever it’s worn through.</p>
+          <!-- PLACEHOLDER: confirm the actual returns / rebuild terms with the founder. -->
+          <p>
+            Small repairs are free for the life of the piece. If it’s past repair, it gets taken apart and rebuilt, and the
+            new piece gets a new number and a record that starts with yours.
+          </p>
+          <Button href="mailto:bench@rawreturn.co.uk" variant="outline">Write to the bench</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .open {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(32px, 5vw, 64px);
+    display: grid;
+    gap: clamp(20px, 3vw, 36px);
+  }
+  .open-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .intro {
+    row-gap: 32px;
+    align-items: end;
+  }
+  .intro-img {
+    grid-column: 1 / span 7;
+  }
+  .intro-text {
+    grid-column: 9 / span 4;
+    display: grid;
+    gap: 1em;
+  }
+  .f-grid {
+    margin-top: clamp(40px, 6vw, 80px);
+    row-gap: 48px;
+    align-items: start;
+  }
+  .f-quote {
+    grid-column: 1 / span 7;
+  }
+  .f-text {
+    grid-column: 2 / span 5;
+    font-family: var(--font-voice);
+    font-size: 1.2rem;
+    line-height: 1.55;
+  }
+  .f-img {
+    grid-column: 9 / span 4;
+    grid-row: 1 / span 2;
+    margin-top: 12vh;
+  }
+  .l-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 48px;
+  }
+  .l-text {
+    grid-column: 1 / span 7;
+    display: grid;
+    gap: 28px;
+    align-content: start;
+  }
+  .l-table {
+    grid-column: 9 / span 4;
+    border-collapse: collapse;
+    align-self: start;
+  }
+  .l-table th,
+  .l-table td {
+    text-align: left;
+    font-weight: inherit;
+    padding: 9px 0 8px;
+    border-top: 1px solid var(--rule);
+  }
+  .l-table td {
+    text-align: right;
+  }
+  .l-table thead th {
+    color: var(--ink-soft);
+    border-top: 0;
+  }
+  .l-table tfoot th,
+  .l-table tfoot td {
+    border-top: 2px solid transparent;
+    border-image: var(--stitch) 1;
+    border-image-slice: 1 0 0 0;
+  }
+  .one-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 32px;
+  }
+  .one-title {
+    grid-column: 1 / span 6;
+  }
+  .one-text {
+    grid-column: 8 / span 5;
+    display: grid;
+    gap: 1em;
+  }
+  .p-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--gutter);
+    margin-top: 32px;
+  }
+  .p-list li {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .c-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 32px;
+  }
+  .c-title {
+    grid-column: 1 / span 5;
+  }
+  .c-list {
+    grid-column: 7 / span 6;
+  }
+  .c-list li {
+    display: grid;
+    grid-template-columns: 4ch 1fr;
+    gap: 12px;
+    padding: 14px 0 12px;
+    border-top: 1px solid var(--rule);
+  }
+  .r-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 32px;
+  }
+  .r-title {
+    grid-column: 1 / span 7;
+  }
+  .r-text {
+    grid-column: 9 / span 4;
+    display: grid;
+    gap: 1em;
+    justify-items: start;
+    align-self: end;
+  }
+  @media (max-width: 899px) {
+    .intro-img,
+    .intro-text,
+    .f-quote,
+    .f-text,
+    .f-img,
+    .l-text,
+    .l-table,
+    .one-title,
+    .one-text,
+    .c-title,
+    .c-list,
+    .r-title,
+    .r-text {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+    .f-img {
+      margin-top: 0;
+      width: 75%;
+      justify-self: end;
+    }
+    .p-list {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 32px;
+    }
+  }
+  @media (max-width: 560px) {
+    .p-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

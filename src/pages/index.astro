@@ -1,0 +1,812 @@
+---
+import Base from '../layouts/Base.astro';
+import Img from '../components/Img.astro';
+import Lines from '../components/Lines.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import EditorialImage from '../components/EditorialImage.astro';
+import ContactSheet from '../components/ContactSheet.astro';
+import FounderQuote from '../components/FounderQuote.astro';
+import ArchiveRecord from '../components/ArchiveRecord.astro';
+import ArchiveTable from '../components/ArchiveTable.astro';
+import PieceCard from '../components/PieceCard.astro';
+import Button from '../components/Button.astro';
+import Status from '../components/Status.astro';
+import stages from '../data/process';
+import { bySlug, available, archiveOrder, inWork, formatPrice, totals } from '../data/pieces';
+
+const feature = bySlug('rr-014')!;
+const current = inWork();
+const forSale = available();
+const t = totals();
+const returnedFrames = ['rr-013', 'rr-011', 'rr-004', 'rr-009']
+  .map((s) => bySlug(s)!)
+  .filter((p) => p.images.returned);
+---
+
+<Base headerTone="dark">
+  <!-- ─────────────────────────────── 01 THE WORLD -->
+  <section class="hero on-night" data-tone="dark" aria-labelledby="hero-title">
+    <div class="hero-img">
+      <!-- PLACEHOLDER: replace with the founder's workshop image — the bench at night, RR-014 half-built, one lamp. -->
+      <Img
+        src="hero/hero-bench-night"
+        alt="The cutting table at night under one lamp: pinned denim panels from different jeans, pattern paper, shears, a tape measure and an unsewn tan leather patch."
+        loading="eager"
+        fetchpriority="high"
+        sizes="100vw"
+        data-parallax="0.06"
+      />
+    </div>
+    <div class="hero-content wrap">
+      <p class="hero-top mono mono--m" data-reveal="fade">
+        <span>London</span>
+        {
+          current && (
+            <a href={`/archive/${current.slug}`} class="hero-live">
+              <span class="pulse" aria-hidden="true" /> {current.no} on the bench ·{' '}
+              <span data-day-since={current.started}>In work</span>
+            </a>
+          )
+        }
+      </p>
+      <Lines as="h1" id="hero-title" class="stamp mega hero-title" lines={['Already worn.', 'Never made.']} delay={150} />
+      <div class="hero-foot">
+        <p class="voice hero-tag" data-reveal style="--i:4">Reclaimed garments returned to the streets.</p>
+        <a href="#idea" class="mono mono--m hero-cue" data-reveal="fade" style="--i:6">Begin ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 02 THE IDEA -->
+  <section class="idea section wrap" id="idea" aria-labelledby="idea-title">
+    <SectionLabel n="01" label="The idea" aside={`RR-001 → RR-${String(t.pieces).padStart(3, "0")}`} />
+    <div class="grid idea-grid">
+      <Lines
+        as="h2"
+        id="idea-title"
+        class="stamp display idea-title"
+        lines={['Every piece', 'starts with', 'something that', 'already existed.']}
+      />
+      <div class="idea-body body-copy" data-reveal>
+        <p class="lede">
+          Jeans and jackets that have already been bought, worn, faded and thrown out. Taken apart seam by seam in a London
+          workshop and rebuilt into something that didn’t exist before.
+        </p>
+        <p>Every piece is numbered and recorded: what it was, where it was found, how long it took. Then it goes back out.</p>
+      </div>
+    </div>
+    <ol role="list" class="cycle grid">
+      <li data-reveal style="--i:0">
+        <p class="mono mono--m meta">01 → 02</p>
+        <h3 class="stamp h2">First life</h3>
+        <p>Where it was found, what it was, the wear it carries.</p>
+      </li>
+      <li data-reveal style="--i:1">
+        <p class="mono mono--m meta">02 → 03</p>
+        <h3 class="stamp h2">Second life</h3>
+        <p>Unpicked, cut, pinned, failed, rebuilt. Shown in full.</p>
+      </li>
+      <li data-reveal style="--i:2">
+        <p class="mono mono--m meta">03 → 01</p>
+        <h3 class="stamp h2">Return</h3>
+        <p>Back on a real person, on a real street. And when it’s worn out, it can come back.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ─────────────────────────────── 03 THE PILE -->
+  <section class="pile" aria-labelledby="pile-title">
+    <div class="wrap">
+      <SectionLabel n="02" label="The pile" aside="Walthamstow, E17 · 03.2026" />
+    </div>
+    <div class="pile-grid wrap grid">
+      <div class="pile-main">
+        <!-- PLACEHOLDER: replace with a sourcing photograph — the pile on a concrete floor, available light. -->
+        <EditorialImage
+          src="workshop/the-pile"
+          alt="A pile of used jeans and denim jackets on a concrete floor, every wash from raw indigo to almost white."
+          ratio="3/2"
+          sizes="(min-width: 900px) 66vw, 100vw"
+          parallax={0.08}
+          caption="The pile · 200 pairs"
+          captionAside="Available light"
+        />
+      </div>
+      <div class="pile-figures">
+        <p class="stamp pile-n" id="pile-title" data-lines>
+          <span class="line" style="--l:0"><span>200 pairs.</span></span>
+          <span class="line" style="--l:1"><span>11 kept.</span></span>
+        </p>
+        <p class="pile-copy" data-reveal>
+          Most of the pile is thin, stretchy and faded by a machine. What stays is heavy cotton, worn by somebody: honest
+          fading, hand repairs, the outline of a phone on a back pocket.
+        </p>
+        <div class="pile-small" data-reveal="mask" style="--i:2">
+          <div class="frame" style="aspect-ratio:4/5">
+            <Img
+              src="workshop/the-pile-flash"
+              alt="Close view of the pile under flash: folded legs, waistbands and pockets."
+              sizes="(min-width: 900px) 22vw, 50vw"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 04 THE BENCH -->
+  <ContactSheet
+    id="bench"
+    kicker="03 — The bench · In work"
+    title="Taken apart. Rebuilt."
+    frames={stages.map((s) => ({ image: s.image, alt: s.alt, n: s.n, label: s.name, note: s.note }))}
+  />
+
+  <!-- ─────────────────────────────── 05 THE HAND -->
+  <section class="hand section wrap" aria-labelledby="hand-title">
+    <SectionLabel n="04" label="The hand" aside="The founder, at the bench" />
+    <div class="grid hand-grid">
+      <div class="hand-img">
+        <!-- PLACEHOLDER: replace with the founder at the bench — from behind or side-on, hands at work. Never a posed portrait. -->
+        <EditorialImage
+          src="founder/founder-bench"
+          alt="The founder’s bench from above, late: pinned panels, pattern paper and shears in a pool of lamp light."
+          ratio="4/5"
+          sizes="(min-width: 900px) 40vw, 100vw"
+          caption="The bench, 23:40"
+          captionAside="Available light"
+        />
+      </div>
+      <div class="hand-text">
+        <h2 id="hand-title" class="visually-hidden">The founder</h2>
+        <FounderQuote quote="I don’t start with a blank piece of fabric. I start with what is already there." size="l" />
+        <div class="body-copy" data-reveal>
+          <p>
+            One person, one bench, in London. Every decision on every piece is made by hand: which pair, which panel, which
+            way the fade runs, and when to stop and start again.
+          </p>
+        </div>
+        <Button href="/the-house" variant="link">The house</Button>
+      </div>
+      <dl class="hand-count record" aria-label="The house so far">
+        <div data-reveal style="--i:0"><dt>Pieces</dt><dd class="stamp">{String(t.pieces).padStart(3, '0')}</dd></div>
+        <div data-reveal style="--i:1"><dt>Garments taken apart</dt><dd class="stamp">{t.garments}</dd></div>
+        <div data-reveal style="--i:2"><dt>Hours at the bench</dt><dd class="stamp">{t.hours}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 06 THE OBJECT -->
+  <section class="object on-stone" aria-labelledby="object-title">
+    <div class="wrap section">
+      <SectionLabel n="05" label="Now available — one" aside={`${feature.no} · 1/1`} />
+      <div class="grid object-grid">
+        <div class="object-type">
+          <p class="record meta" data-reveal="fade">{feature.no}</p>
+          <Lines as="h2" id="object-title" class="stamp object-title" lines={['Panel', 'Trucker']} />
+          <p class="lede" data-reveal>Five garments, twenty-three panels, thirty-eight hours.</p>
+          <div class="object-cta" data-reveal style="--i:2">
+            <Button href={`/archive/${feature.slug}`} arrow="↓">See how it was made</Button>
+            <p class="record">{formatPrice(feature.price)} · 1/1</p>
+          </div>
+        </div>
+
+        <figure class="object-fig">
+          <a href={`/archive/${feature.slug}`} class="frame object-frame" data-reveal="mask" data-cursor={`${feature.no} →`}>
+            <div class="object-img">
+              <Img src={feature.images.front} alt={feature.alt.front} sizes="(min-width: 900px) 42vw, 100vw" />
+            </div>
+          </a>
+          <!-- pattern-cutter callouts: one line, one label, pointing at a real detail -->
+          <ul role="list" class="callouts mono mono--s" aria-label="Details">
+            <li class="co co-1" data-reveal="fade" style="--i:3"><span>Original hem, 501</span></li>
+            <li class="co co-2" data-reveal="fade" style="--i:4"><span>Selvedge, inside placket</span></li>
+            <li class="co co-3" data-reveal="fade" style="--i:5"><span>L. sleeve · attempt 3</span></li>
+            <li class="co co-4" data-reveal="fade" style="--i:6"><span>64 cm</span></li>
+          </ul>
+        </figure>
+
+        <div class="object-side">
+          <EditorialImage
+            src={feature.images.detail!}
+            alt={feature.alt.detail!}
+            ratio="1/1"
+            sizes="(min-width: 900px) 20vw, 50vw"
+            caption="Two first lives, one seam"
+            i={1}
+          />
+          <FounderQuote quote={feature.note} cite="The founder" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 07 THE RECORD -->
+  <section class="record-sec section wrap ledger" aria-labelledby="record-title">
+    <SectionLabel n="06" label="The record" aside="Numbers never reset" />
+    <div class="grid record-grid">
+      <div class="record-intro">
+        <Lines as="h2" id="record-title" class="stamp h1" lines={['Young.', 'Already', 'a system.']} />
+        <p class="body-copy" data-reveal>
+          Every piece gets a number and a record with two halves — first life, second life — sewn into the side seam and
+          kept here for good. Sold pieces stay up. They’re the proof.
+        </p>
+      </div>
+      <div class="record-card" data-reveal>
+        <ArchiveRecord piece={feature} />
+      </div>
+    </div>
+    <div class="record-table">
+      <ArchiveTable pieces={archiveOrder().slice(0, 6)} />
+      <div class="record-more">
+        <Button href="/archive" variant="outline">The full archive · {t.pieces} pieces</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 08 THE STREET -->
+  <section class="street on-night" data-tone="dark" aria-labelledby="street-title">
+    <div class="wrap section">
+      <SectionLabel n="07" label="Returned" aside="Direct flash · London, night" />
+      <Lines as="h2" id="street-title" class="stamp mega street-title" lines={['Made here.', 'Worn out there.']} />
+      <div class="street-grid">
+        {
+          returnedFrames.map((p, i) => (
+            <figure class={`sf sf-${i + 1}`}>
+              <a href={`/archive/${p.slug}`} class="frame sf-frame" data-reveal="mask" style={`--i:${i}`} data-cursor={`${p.no} →`}>
+                <div class="sf-inner" data-parallax={i % 2 ? '0.05' : '0.1'}>
+                  <Img src={p.images.returned!} alt={p.alt.returned!} sizes="(min-width: 900px) 40vw, 90vw" />
+                </div>
+              </a>
+              <figcaption class="caption mono mono--s">
+                <span>{p.no} · {p.returned?.by}</span>
+                <span>{p.returned?.date}</span>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+      <p class="street-note voice" data-reveal>
+        The switch in light marks the moment a piece leaves the bench.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 09 THE RETURN -->
+  <section class="return section wrap" aria-labelledby="return-title">
+    <SectionLabel n="08" label="The return" aside="Bring it back" />
+    <div class="grid return-grid">
+      <Lines as="h2" id="return-title" class="stamp display return-title" lines={['One of one.', 'Then it goes', 'back out.']} />
+      <div class="return-body" data-reveal>
+        <p class="lede">
+          A garment is finished when somebody wears it on the street. When it’s worn through, send it back. It gets taken
+          apart, rebuilt, and given a new number.
+        </p>
+        <Button href="/the-house#returns" variant="link">How returns work</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────── 10 THE SHOP -->
+  <section class="shop-sec section--tight wrap" aria-labelledby="shop-title">
+    <SectionLabel n="09" label="Current return" aside={`${forSale.length} pieces available`} />
+    <div class="shop-head">
+      <h2 id="shop-title" class="stamp h1" data-reveal>Available now</h2>
+      <Button href="/shop" variant="outline">The shop</Button>
+    </div>
+    <div class="shop-grid">
+      {forSale.map((p, i) => <PieceCard piece={p} i={i} />)}
+      {
+        current && (
+          <a href={`/archive/${current.slug}`} class="shop-inwork" data-reveal style="--i:2">
+            <Status status="in-work" />
+            <p class="record meta">{current.no}</p>
+            <p class="stamp h2">{current.name}</p>
+            <p>{current.description}</p>
+            <p class="mono">
+              Started {current.started} · <span data-day-since={current.started}>In work</span>
+            </p>
+          </a>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ── hero */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    overflow: hidden;
+  }
+  .hero-img {
+    position: absolute;
+    inset: 0;
+  }
+  .hero-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(12, 17, 29, 0.35) 0%, transparent 30%, transparent 55%, rgba(12, 17, 29, 0.6) 100%);
+  }
+  .hero-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: calc(var(--header-h) + 20px);
+    padding-bottom: clamp(20px, 3vw, 40px);
+    width: 100%;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    letter-spacing: 0.1em;
+  }
+  .hero-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--hide);
+    animation: rr-pulse 2.4s infinite;
+  }
+  .hero-title {
+    margin-top: auto;
+    color: var(--ecru);
+    font-size: clamp(2.6rem, min(7.6vw, 15vh), 10rem);
+    white-space: nowrap;
+  }
+  @media (max-width: 560px) {
+    .hero-title {
+      white-space: normal;
+      font-size: clamp(2.6rem, 15vw, 5rem);
+    }
+  }
+  .hero-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-top: clamp(16px, 2.4vw, 32px);
+  }
+  .hero-tag {
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+    max-width: 24ch;
+  }
+  .hero-cue {
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── idea */
+  .idea-grid {
+    margin-top: clamp(40px, 6vw, 80px);
+    row-gap: 40px;
+  }
+  .idea-title {
+    grid-column: 1 / span 8;
+  }
+  .idea-body {
+    grid-column: 9 / span 4;
+    align-self: end;
+    display: grid;
+    gap: 1em;
+  }
+  .cycle {
+    margin-top: clamp(64px, 9vw, 140px);
+    row-gap: 32px;
+  }
+  .cycle li {
+    grid-column: span 4;
+    display: grid;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 2px solid transparent;
+    border-image: var(--stitch) 1;
+    border-image-slice: 1 0 0 0;
+  }
+  .cycle li:not(:first-child) {
+    border-image: linear-gradient(var(--rule-strong), var(--rule-strong)) 1;
+    border-image-slice: 1 0 0 0;
+  }
+  .cycle p:last-child {
+    max-width: 30ch;
+  }
+
+  /* ── pile */
+  .pile {
+    padding-bottom: clamp(72px, 12vw, 180px);
+  }
+  .pile-grid {
+    margin-top: 24px;
+    row-gap: 40px;
+  }
+  .pile-main {
+    grid-column: 1 / span 8;
+  }
+  .pile-figures {
+    grid-column: 9 / span 4;
+    display: grid;
+    gap: 28px;
+    align-content: start;
+  }
+  .pile-n {
+    font-size: clamp(2.6rem, 5.6vw, 6rem);
+  }
+  .pile-copy {
+    max-width: 34ch;
+  }
+  .pile-small {
+    width: 72%;
+    justify-self: end;
+    margin-top: 12px;
+  }
+  .pile-small :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── hand */
+  .hand-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 48px;
+    align-items: start;
+  }
+  .hand-img {
+    grid-column: 1 / span 5;
+  }
+  .hand-text {
+    grid-column: 7 / span 6;
+    display: grid;
+    gap: 32px;
+    padding-top: clamp(0px, 8vw, 120px);
+  }
+  .hand-count {
+    grid-column: 7 / span 6;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gutter);
+  }
+  .hand-count div {
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+  .hand-count dt {
+    color: var(--ink-soft);
+  }
+  .hand-count dd {
+    margin: 0;
+    font-size: clamp(1.8rem, 3.6vw, 3.4rem);
+  }
+
+  /* ── object */
+  .object-grid {
+    margin-top: clamp(32px, 5vw, 64px);
+    row-gap: 48px;
+    align-items: start;
+  }
+  .object-type {
+    grid-column: 1 / span 4;
+    display: grid;
+    gap: 22px;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  :global(.object-title) {
+    font-size: clamp(2.6rem, 4.3vw, 5.4rem);
+  }
+  @media (max-width: 899px) {
+    :global(.object-title) {
+      font-size: clamp(2.6rem, 13vw, 5rem);
+    }
+  }
+  .object-cta {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .object-fig {
+    grid-column: 5 / span 5;
+    position: relative;
+  }
+  .object-frame {
+    display: block;
+    aspect-ratio: 4/5;
+  }
+  .object-img {
+    position: absolute;
+    inset: 0;
+  }
+  .object-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .object-frame:hover .object-img :global(img) {
+    transform: scale(1.025);
+  }
+  .callouts {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .co {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ecru);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .co span {
+    background: rgba(18, 18, 18, 0.55);
+    padding: 3px 6px 2px;
+  }
+  .co::before {
+    content: '';
+    width: clamp(28px, 4vw, 64px);
+    height: 1px;
+    background: var(--ecru);
+    order: 0;
+  }
+  .co-1 {
+    left: 6%;
+    bottom: 22%;
+  }
+  .co-2 {
+    left: 46%;
+    top: 30%;
+  }
+  .co-3 {
+    left: 2%;
+    top: 46%;
+  }
+  .co-4 {
+    right: 4%;
+    top: 12%;
+    flex-direction: row-reverse;
+  }
+  .object-side {
+    grid-column: 10 / span 3;
+    display: grid;
+    gap: 40px;
+    padding-top: 18vh;
+  }
+  .object-side :global(.voice) {
+    font-size: clamp(1.2rem, 1.7vw, 1.6rem);
+  }
+
+  /* ── record */
+  .record-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 40px;
+    align-items: start;
+  }
+  .record-intro {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: 28px;
+  }
+  .record-card {
+    grid-column: 7 / span 6;
+    transform: rotate(-1.2deg);
+    box-shadow: 0 30px 60px -30px rgba(18, 18, 18, 0.35);
+  }
+  .record-table {
+    margin-top: clamp(64px, 9vw, 120px);
+  }
+  .record-more {
+    margin-top: 28px;
+  }
+
+  /* ── street */
+  .street-title {
+    margin-top: clamp(32px, 5vw, 64px);
+  }
+  .street-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gutter);
+    margin-top: clamp(48px, 7vw, 96px);
+  }
+  .sf-frame {
+    display: block;
+    aspect-ratio: 4/5;
+  }
+  .sf-inner {
+    position: absolute;
+    inset: 0;
+  }
+  .sf-inner :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sf-1 {
+    grid-column: 1 / span 5;
+  }
+  .sf-2 {
+    grid-column: 7 / span 4;
+    margin-top: 28vh;
+  }
+  .sf-3 {
+    grid-column: 2 / span 3;
+    margin-top: -6vh;
+  }
+  .sf-4 {
+    grid-column: 6 / span 6;
+    margin-top: 10vh;
+  }
+  .sf-4 .sf-frame {
+    aspect-ratio: 3/2;
+  }
+  .street-note {
+    margin-top: clamp(56px, 8vw, 120px);
+    max-width: 22ch;
+    margin-left: auto;
+    color: var(--stone);
+  }
+
+  /* ── return */
+  .return-grid {
+    margin-top: clamp(40px, 6vw, 72px);
+    row-gap: 32px;
+  }
+  .return-title {
+    grid-column: 1 / span 8;
+  }
+  .return-body {
+    grid-column: 9 / span 4;
+    align-self: end;
+    display: grid;
+    gap: 22px;
+  }
+
+  /* ── shop */
+  .shop-sec {
+    padding-bottom: clamp(80px, 10vw, 140px);
+  }
+  .shop-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin: clamp(32px, 4vw, 56px) 0 clamp(28px, 4vw, 48px);
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(32px, 4vw, 56px) var(--gutter);
+  }
+  .shop-inwork {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    justify-items: start;
+    padding: clamp(18px, 2vw, 28px);
+    border: 1px dashed var(--rule-strong);
+    text-decoration: none;
+  }
+  .shop-inwork p:nth-of-type(3) {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* ── responsive recomposition */
+  @media (max-width: 899px) {
+    .idea-title,
+    .idea-body,
+    .pile-main,
+    .pile-figures,
+    .hand-img,
+    .hand-text,
+    .hand-count,
+    .object-type,
+    .object-fig,
+    .object-side,
+    .record-intro,
+    .record-card,
+    .return-title,
+    .return-body {
+      grid-column: 1 / -1;
+    }
+    .cycle li {
+      grid-column: 1 / -1;
+    }
+    .pile-figures {
+      grid-template-columns: 1fr 1fr;
+      align-items: end;
+    }
+    .pile-n {
+      grid-column: 1 / -1;
+    }
+    .pile-small {
+      width: 100%;
+      margin: 0;
+    }
+    .hand-img {
+      width: 82%;
+    }
+    .hand-text {
+      padding-top: 0;
+    }
+    .object-type {
+      position: static;
+    }
+    .object-side {
+      padding-top: 0;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .co-2,
+    .co-3 {
+      display: none;
+    }
+    .record-card {
+      transform: none;
+    }
+    .street-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .sf-1 {
+      grid-column: 1 / span 5;
+    }
+    .sf-2 {
+      grid-column: 2 / span 5;
+      margin-top: 0;
+    }
+    .sf-3 {
+      grid-column: 1 / span 3;
+      margin-top: 0;
+    }
+    .sf-4 {
+      grid-column: 1 / -1;
+      margin-top: 0;
+    }
+    .shop-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .shop-grid {
+      grid-template-columns: 1fr;
+    }
+    .pile-figures {
+      grid-template-columns: 1fr;
+    }
+    .pile-small {
+      width: 70%;
+      justify-self: end;
+    }
+    .object-side {
+      grid-template-columns: 1fr;
+    }
+    .hand-count {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .hero-foot {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

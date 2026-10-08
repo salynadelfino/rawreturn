@@ -1,0 +1,73 @@
+---
+/**
+ * The wordmark. Archivo Expanded 800, always uppercase, and never a normal
+ * space: the gap between RAW and RETURN is fixed at 0.55em, like two panels
+ * joined by a seam. `seam` carries the tan stitch in the gap (header, campaign).
+ * `stacked` is the label lockup with the tagline in mono beneath.
+ */
+interface Props {
+  variant?: 'primary' | 'seam' | 'stacked';
+  as?: 'span' | 'div' | 'p';
+  class?: string;
+}
+const { variant = 'primary', as: Tag = 'span', class: cls } = Astro.props;
+---
+
+<Tag class:list={['wordmark', `wordmark--${variant}`, cls]} role="img" aria-label="Raw Return">
+  <span class="wm-word" aria-hidden="true">Raw</span><span class="wm-gap" aria-hidden="true"></span><span
+    class="wm-word"
+    aria-hidden="true">Return</span
+  >
+  {
+    variant === 'stacked' && (
+      <span class="wm-tag mono" aria-hidden="true">
+        Reclaimed garments
+        <br />
+        returned to the streets
+      </span>
+    )
+  }
+</Tag>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: var(--font-stamp);
+    font-stretch: 125%;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 0.86;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+  }
+  .wm-gap {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 0.55em;
+    align-self: center;
+    height: 2px;
+  }
+  .wordmark--seam .wm-gap {
+    background: var(--stitch);
+    background-size: 100% 2px;
+    transform: scaleX(var(--seam, 1));
+    transition: transform var(--dur-3) var(--ease-out);
+  }
+  .wordmark--stacked {
+    display: inline-grid;
+    grid-template-columns: auto;
+    row-gap: 0.06em;
+  }
+  .wordmark--stacked .wm-gap {
+    display: none;
+  }
+  .wm-tag {
+    margin-top: 0.9em;
+    font-size: max(0.12em, 9px);
+    font-stretch: 100%;
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+  }
+</style>

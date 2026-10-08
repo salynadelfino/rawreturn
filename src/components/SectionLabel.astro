@@ -1,0 +1,33 @@
+---
+/** Small mono running head: "03 — The pile". Sits on a hairline like a ledger entry. */
+interface Props {
+  n?: string;
+  label: string;
+  aside?: string;
+  class?: string;
+}
+const { n, label, aside, class: cls } = Astro.props;
+---
+
+<div class:list={['sl', 'mono', 'mono--m', cls]} data-reveal="fade">
+  <span>{n && <span class="sl-n">{n} —</span>} {label}</span>
+  {aside && <span class="sl-aside">{aside}</span>}
+</div>
+
+<style>
+  .sl {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule-strong);
+    letter-spacing: 0.1em;
+  }
+  .sl-n {
+    color: var(--ink-soft);
+  }
+  .sl-aside {
+    color: var(--ink-soft);
+    text-align: right;
+  }
+</style>

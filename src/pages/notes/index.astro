@@ -1,0 +1,208 @@
+---
+/**
+ * Notes — the house's ongoing documentation, as recurring series.
+ * Filter by series (client-side; also reads ?series= from the URL).
+ */
+import Base from '../../layouts/Base.astro';
+import Lines from '../../components/Lines.astro';
+import Img from '../../components/Img.astro';
+import notes, { series } from '../../data/notes';
+import type { Series } from '../../data/notes';
+
+const list = [...notes].sort((a, b) => b.date.split('.').reverse().join('').localeCompare(a.date.split('.').reverse().join('')));
+const names = Object.keys(series) as Series[];
+---
+
+<Base title="Notes" description="Ongoing documentation from the Raw Return workshop: The Pile, Unpicked, In Work, Failed, Bench Notes, Returned.">
+  <section class="head wrap">
+    <div class="head-row mono mono--m meta">
+      <span>Notes</span>
+      <span>From the bench, as it happens</span>
+    </div>
+    <Lines as="h1" class="stamp mega" lines={['Notes']} />
+    <dl class="series" data-notes-filters>
+      {
+        names.map((n, i) => (
+          <div data-reveal="fade" style={`--i:${i}`}>
+            <dt>
+              <button type="button" class="stamp" data-series={n} aria-pressed="false">
+                {n}
+              </button>
+            </dt>
+            <dd class="mono mono--s meta mono--sentence">{series[n]}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="mono mono--s meta" aria-live="polite" data-notes-status>Showing all series.</p>
+  </section>
+
+  <section class="wrap list" aria-label="Notes">
+    <ol role="list" class="entries">
+      {
+        list.map((n, i) => (
+          <li data-entry-series={n.series} class:list={['entry', i === 0 && 'entry--lead']}>
+            <a href={`/notes/${n.slug}`} class="entry-link" data-cursor="Read →">
+              <div class="frame entry-img" data-reveal="mask" style={`--i:${i % 3}`}>
+                <Img src={n.image} alt={n.alt} sizes={i === 0 ? '(min-width: 900px) 60vw, 100vw' : '(min-width: 900px) 30vw, 100vw'} />
+              </div>
+              <div class="entry-text">
+                <p class="record entry-meta">
+                  <span>{n.series}</span>
+                  <span>{n.piece ? `${n.piece} · ` : ''}{n.date}</span>
+                </p>
+                <h2 class="stamp entry-title">{n.title}</h2>
+                <p class="entry-dek">{n.dek}</p>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Base>
+
+<script>
+  function initNotes() {
+    const root = document.querySelector<HTMLElement>('[data-notes-filters]');
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = '1';
+    const status = document.querySelector<HTMLElement>('[data-notes-status]')!;
+    const set = (s: string | null) => {
+      root.querySelectorAll<HTMLButtonElement>('[data-series]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.series === s)));
+      let shown = 0;
+      document.querySelectorAll<HTMLElement>('[data-entry-series]').forEach((li) => {
+        li.hidden = !!s && li.dataset.entrySeries !== s;
+        if (!li.hidden) {
+          shown++;
+          li.querySelectorAll('[data-reveal]').forEach((r) => r.classList.add('is-in'));
+        }
+      });
+      status.textContent = s ? `Showing ${s} — ${shown} ${shown === 1 ? 'entry' : 'entries'}.` : 'Showing all series.';
+      const url = new URL(location.href);
+      if (s) url.searchParams.set('series', s);
+      else url.searchParams.delete('series');
+      history.replaceState(history.state, '', url);
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-series]').forEach((b) =>
+      b.addEventListener('click', () => set(b.getAttribute('aria-pressed') === 'true' ? null : b.dataset.series!)),
+    );
+    const q = new URL(location.href).searchParams.get('series');
+    if (q) set(q);
+  }
+  document.addEventListener('astro:page-load', initNotes);
+</script>
+
+<style>
+  .head {
+    padding-top: calc(var(--header-h) + clamp(24px, 4vw, 56px));
+    padding-bottom: clamp(40px, 6vw, 72px);
+    display: grid;
+    gap: clamp(20px, 3vw, 36px);
+  }
+  .head-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+  }
+  .series {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--gutter);
+  }
+  .series div {
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 10px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .series dd {
+    margin: 0;
+  }
+  .series button {
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+  }
+  .series button[aria-pressed='true'] {
+    text-decoration: underline;
+    text-decoration-color: var(--return-tan);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  .list {
+    padding-bottom: clamp(80px, 10vw, 140px);
+  }
+  .entries {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(40px, 5vw, 72px) var(--gutter);
+  }
+  .entry--lead {
+    grid-column: 1 / -1;
+  }
+  .entry-link {
+    display: grid;
+    gap: 16px;
+    text-decoration: none;
+  }
+  .entry--lead .entry-link {
+    grid-template-columns: 7fr 5fr;
+    gap: var(--gutter);
+    align-items: end;
+  }
+  .entry-img {
+    aspect-ratio: 3/2;
+  }
+  .entry-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .entry-link:hover .entry-img :global(img) {
+    transform: scale(1.03);
+  }
+  .entry-text {
+    display: grid;
+    gap: 10px;
+  }
+  .entry-meta {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+  }
+  .entry-title {
+    font-size: clamp(1.15rem, 1.8vw, 1.6rem);
+  }
+  .entry--lead .entry-title {
+    font-size: clamp(1.8rem, 3.6vw, 3.4rem);
+  }
+  .entry-dek {
+    color: var(--ink-soft);
+    max-width: 44ch;
+  }
+  @media (max-width: 899px) {
+    .series {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: 18px;
+    }
+    .entries {
+      grid-template-columns: 1fr 1fr;
+    }
+    .entry--lead .entry-link {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .entries {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

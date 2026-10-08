@@ -1,0 +1,254 @@
+---
+import Wordmark from './Wordmark.astro';
+import { inWork } from '../data/pieces';
+
+const nav = [
+  { href: '/shop', label: 'Shop' },
+  { href: '/the-house', label: 'The House' },
+  { href: '/process', label: 'Process' },
+  { href: '/archive', label: 'Archive' },
+  { href: '/notes', label: 'Notes' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+const current = inWork();
+---
+
+<header class="site-header" data-header transition:persist="site-header">
+  <div class="bar wrap">
+    <a href="/" class="home" aria-label="Raw Return — home">
+      <Wordmark variant="seam" />
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <ul role="list">
+        {
+          nav.map((n) => (
+            <li>
+              <a href={n.href} class="mono mono--m" aria-current={isCurrent(n.href) ? 'page' : undefined}>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <button class="bag mono mono--m" type="button" data-bag-open aria-haspopup="dialog" aria-controls="bag">
+        Bag (<span data-bag-count>0</span>)
+      </button>
+      <button
+        class="menu-btn mono mono--m"
+        type="button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="menu"
+      >
+        <span class="menu-open">Menu</span><span class="menu-close">Close</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="menu on-indigo" id="menu" data-menu hidden>
+    <nav aria-label="Main (mobile)" class="wrap menu-inner">
+      <ol role="list" class="menu-list">
+        {
+          nav.map((n, i) => (
+            <li style={`--i:${i}`}>
+              <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>
+                <span class="mono">{String(i + 1).padStart(2, '0')}</span>
+                <span class="stamp">{n.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      {
+        current && (
+          <a class="menu-current mono" href={`/archive/${current.slug}`}>
+            <span class="pulse" aria-hidden="true" /> On the bench now — {current.no} {current.name}
+          </a>
+        )
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+    color: var(--ink);
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--header-h);
+    background: var(--ground);
+    border-bottom: 1px solid var(--rule);
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      background var(--dur-2);
+  }
+  :global(.site-header[data-hidden]) {
+    transform: translateY(-100%);
+  }
+  :global(.site-header[data-tone='dark']) {
+    color: var(--ecru);
+  }
+  :global(.site-header[data-tone='dark'])::before {
+    opacity: 0;
+  }
+  .bar {
+    position: relative;
+    height: var(--header-h);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--gutter);
+  }
+  .home {
+    justify-self: start;
+    font-size: 15px;
+    text-decoration: none;
+    padding: 8px 0;
+  }
+  .nav ul {
+    display: flex;
+    gap: clamp(16px, 2.4vw, 36px);
+  }
+  .nav a,
+  .bag,
+  .menu-btn {
+    position: relative;
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    padding: 10px 0;
+    background: none;
+    border: 0;
+  }
+  .nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .nav a:hover::after,
+  .nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  .actions {
+    justify-self: end;
+    display: flex;
+    gap: 24px;
+  }
+  .menu-btn {
+    display: none;
+  }
+  .menu-close {
+    display: none;
+  }
+  :global(.site-header[data-menu-open]) .menu-open {
+    display: none;
+  }
+  :global(.site-header[data-menu-open]) .menu-close {
+    display: inline;
+  }
+  :global(.site-header[data-menu-open]) {
+    color: var(--ecru);
+  }
+  :global(.site-header[data-menu-open])::before {
+    opacity: 0;
+  }
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    padding-top: calc(var(--header-h) + 24px);
+    overflow-y: auto;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path var(--dur-3) var(--ease-in-out);
+  }
+  :global(.menu.is-open) {
+    clip-path: inset(0 0 0 0);
+  }
+  .menu-inner {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 32px;
+  }
+  .menu-list li {
+    border-top: 1px solid var(--rule);
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out);
+    transition-delay: calc(120ms + var(--i) * 60ms);
+  }
+  :global(.menu.is-open) .menu-list li {
+    opacity: 1;
+    transform: none;
+  }
+  .menu-list a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 16px 0 14px;
+    text-decoration: none;
+  }
+  .menu-list .stamp {
+    font-size: clamp(2rem, 10vw, 3.6rem);
+  }
+  .menu-current {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    text-decoration: none;
+    color: var(--faded-blue);
+  }
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: rr-pulse 2.4s infinite;
+  }
+
+  @media (max-width: 899px) {
+    .bar {
+      grid-template-columns: 1fr auto;
+    }
+    .nav {
+      display: none;
+    }
+    .menu-btn {
+      display: inline-block;
+    }
+    .home {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 900px) {
+    .menu {
+      display: none !important;
+    }
+  }
+</style>

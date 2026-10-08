@@ -1,0 +1,21 @@
+---
+/** Headline set line by line; each line slides up out of its own mask. */
+interface Props {
+  lines: string[];
+  as?: 'h1' | 'h2' | 'h3' | 'p' | 'div';
+  class?: string;
+  delay?: number; // ms
+  id?: string;
+}
+const { lines, as: Tag = 'h2', class: cls, delay = 0, id } = Astro.props;
+---
+
+<Tag class={cls} data-lines style={`--d:${delay}ms`} id={id}>
+  {
+    lines.map((l, i) => (
+      <span class="line" style={`--l:${i}`}>
+        <span>{l}</span>
+      </span>
+    ))
+  }
+</Tag>

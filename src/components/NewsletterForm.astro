@@ -1,0 +1,75 @@
+---
+/**
+ * Newsletter sign-up. PLACEHOLDER: wire `action` to the email provider
+ * (Klaviyo, Mailchimp, Shopify Email…). Until then the script confirms locally.
+ */
+interface Props {
+  id?: string;
+}
+const { id = 'nl' } = Astro.props;
+---
+
+<form class="nl" data-newsletter novalidate>
+  <label for={`${id}-email`} class="mono mono--s">Email</label>
+  <div class="nl-row">
+    <input
+      id={`${id}-email`}
+      name="email"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      required
+      placeholder="you@example.com"
+      aria-describedby={`${id}-msg`}
+    />
+    <button type="submit" class="mono mono--m">Sign up →</button>
+  </div>
+  <p id={`${id}-msg`} class="mono mono--s nl-msg" aria-live="polite">Four or five a year. No discount codes.</p>
+</form>
+
+<style>
+  .nl {
+    display: grid;
+    gap: 8px;
+    max-width: 480px;
+  }
+  .nl-row {
+    display: flex;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: var(--font-mono);
+    font-size: 15px;
+  }
+  input::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+  input:focus {
+    outline: none;
+  }
+  .nl-row:focus-within {
+    border-bottom-color: currentColor;
+    box-shadow: 0 1px 0 currentColor;
+  }
+  button {
+    background: none;
+    border: 0;
+    padding: 0 0 0 16px;
+    letter-spacing: 0.1em;
+  }
+  .nl-msg {
+    color: var(--ink-soft);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  :global(.nl[data-state='error']) .nl-msg {
+    color: var(--hide);
+  }
+</style>
